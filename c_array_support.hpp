@@ -87,21 +87,22 @@ constexpr auto&& flat_index(A&& a) noexcept
 template <c_array Ar>
 constexpr auto&& flat_index(Ar&& a, std::size_t i = 0) noexcept
 {
-    using A = std::remove_cvref_t<Ar>;
+    using A = std::remove_reference_t<Ar>;
+    using E = std::remove_all_extents_t<A>;
+    using R = std::conditional_t<std::is_reference_v<Ar>,E&,E&&>;
     if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
     {
         if constexpr (std::rank_v<A> == 1)
-            return SUBSCRIP(static_cast<Ar&&>(a), i);
+            return (R)SUBSCRIP(static_cast<Ar&&>(a), i);
         else {
             constexpr auto N = flat_size<decltype(a[0])>;
-            return flat_index( SUBSCRIP(static_cast<Ar&&>(a),i/N), i%N);
+            return (R)flat_index( SUBSCRIP(static_cast<Ar&&>(a),i/N), i%N);
         }
-    } else if constexpr (std::is_reference_v<Ar>) {
-        return reinterpret_cast<flat_cast_t<Ar>&>(a)[i];
-    } else {
-        return static_cast<std::remove_all_extents_t<A>&&>(
-               reinterpret_cast<flat_cast_t<Ar>&>(a)[i]);
     }
+    else if constexpr (std::is_reference_v<Ar>)
+        return (R)SUBSCRIP(reinterpret_cast<flat_cast_t<Ar>&>(a),i);
+    else
+        return (R)SUBSCRIP(reinterpret_cast<flat_cast_t<Ar>&&>(a),i);
 }
 
 #undef SUBSCRIP
