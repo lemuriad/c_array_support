@@ -1,0 +1,57 @@
+# Copyright 2021 Will Wray
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE or http://boost.org/LICENSE_1_0.txt)
+
+name: ci_meson
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "**.cpp"
+      - "**.hpp"
+  pull_request:
+    paths:
+      - "**.cpp"
+      - "**.hpp"
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [ g++-10, g++-11, clang++-11, clang++-12 ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - run: pip install meson ninja
+    - run: meson setup ${{ matrix.compiler }}/
+      env:
+        CC: ${{ matrix.compiler }}
+    - run: meson test -C ${{ matrix.compiler }}/ -v
+
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - run: pip install meson
+    - run: brew install pkg-config
+    - run: meson setup build/
+    - run: meson test -C build/ -v
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - run: pip install meson ninja
+    - uses: ilammy/msvc-dev-cmd@v1
+    - run: meson setup -Dcpp_std=c++11 c++11
+    - run: meson test -C c++11/ -v
+    
