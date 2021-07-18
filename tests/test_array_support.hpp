@@ -99,3 +99,21 @@ static_assert( ltl::flat_index(cint4213,6) == 6 );
 static_assert( ltl::flat_index(cint4213,8) == 8 );
 static_assert( ltl::flat_index(cint4213,23) == 3 );
 
+static_assert( std::is_same_v<ltl::flat_element_t<int[2][3]>,
+                                                  int> );
+
+static_assert( std::is_same_v<ltl::flat_element_t<int const[2][3]>,
+                                                  int const> );
+
+static_assert( std::is_same_v<ltl::flat_element_t<int(&)[2][3]>,
+                                                  int&> );
+
+static_assert( std::is_same_v<ltl::flat_element_t<int const(&)[2][3]>,
+                                                  int const&> );
+
+static_assert( std::is_same_v<ltl::flat_element_t<int(&&)[2][3]>,
+                                                  int&&> );
+
+static_assert( std::is_same_v<ltl::flat_element_t<int const(&&)[2][3]>,
+                                                  int const&&> );
+

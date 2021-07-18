@@ -43,6 +43,16 @@ template <c_array_unpadded A, typename E = std::remove_all_extents_t<
                                             std::remove_reference_t<A>>>
 using flat_cast_t = E[flat_size<A>];
 
+namespace impl {
+template<class T>extern std::remove_all_extents_t<T> flat_elem_t;
+template<class T>extern std::remove_all_extents_t<T>& flat_elem_t<T&>;
+template<class T>extern std::remove_all_extents_t<T>&& flat_elem_t<T&&>;
+}
+
+// flat_element_t<T> remove_all_extents, under any reference qual
+template <typename T>
+using flat_element_t = decltype(impl::flat_elem_t<T>);
+
 // same_extents_v<A,B>: trait to tell if A and B have the same extents;
 // array types with the same extents or both rank 0 (non-array) types
 template <typename A, typename B>
