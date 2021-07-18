@@ -186,7 +186,7 @@ struct equal_to
     constexpr bool operator()(L&& l, R&& r) const
       noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
     {
-        if constexpr (! std::is_array_v<std::remove_cvref_t<L>>)
+        if constexpr (! c_array<L>)
             return (L&&)l == (R&&)r;
         else {
             for (int i = 0; i != flat_size<L>; ++i)
@@ -245,7 +245,7 @@ struct less
                < reinterpret_cast<UINTPTR_T>(
                       static_cast<const volatile void*>((R&&)r));
       }
-      else if constexpr (! std::is_array_v<std::remove_cvref_t<L>>)
+      else if constexpr (! c_array<L>)
       {
           return (L&&)l < (R&&)r;
       }
