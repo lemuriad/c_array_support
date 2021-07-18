@@ -1,16 +1,25 @@
 project('c_array_support', 'cpp',
-  default_options : ['cpp_std=c++2a','warning_level=3'],
+  default_options : ['cpp_std=c++20','warning_level=3'],
   version : '0.1'
 )
 
+if meson.get_compiler('cpp').get_id() == 'msvc'
+  extra_args = ['/Zc:preprocessor']
+elif meson.get_compiler('cpp').get_id() == 'clang'
+  extra_args = ['-std=c++20']
+else
+  extra_args = []
+endif
+
 c_array_support_dep = declare_dependency(
-  include_directories : include_directories('.')
+  include_directories : include_directories('.'),
+  compile_args : extra_args
 )
     
 test('test c_array_support',
   executable('test_c_array_support', 'tests/test_array_support.cpp',
   dependencies : [c_array_support_dep])
-)
+).partial_dependency(includes : 'true', compile_args : true)
 
 test('test array_compare',
   executable('test_array_compare', 'tests/test_array_compare.cpp',

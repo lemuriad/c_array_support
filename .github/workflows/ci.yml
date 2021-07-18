@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        compiler: [ g++-10, g++-11, clang++-11, clang++-12 ]
+        compiler: [g++-11, clang++-12]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -31,17 +31,17 @@ jobs:
         CC: ${{ matrix.compiler }}
     - run: meson test -C ${{ matrix.compiler }}/ -v
 
-  macos:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - run: pip install meson
-    - run: brew install pkg-config
-    - run: meson setup build/
-    - run: meson test -C build/ -v
+#  macos:
+#    runs-on: macos-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#    - uses: actions/setup-python@v2
+#      with:
+#        python-version: '3.x'
+#    - run: pip install meson
+#    - run: brew install pkg-config
+#    - run: meson setup build/
+#    - run: meson test -C build/ -v
 
   windows:
     runs-on: windows-latest
@@ -52,6 +52,5 @@ jobs:
         python-version: '3.x'
     - run: pip install meson ninja
     - uses: ilammy/msvc-dev-cmd@v1
-    - run: meson setup -Dcpp_std=c++11 c++11
-    - run: meson test -C c++11/ -v
-    
+    - run: meson setup build
+    - run: meson test -C build -v
