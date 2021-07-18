@@ -4,7 +4,7 @@ project('c_array_support', 'cpp',
 )
 
 if meson.get_compiler('cpp').get_id() == 'msvc'
-  extra_args = ['/Zc:preprocessor']
+  extra_args = ['std:c++latest','/Zc:preprocessor']
 elif meson.get_compiler('cpp').get_id() == 'clang'
   extra_args = ['-std=c++20']
 else
@@ -14,7 +14,7 @@ endif
 c_array_support_dep = declare_dependency(
   include_directories : include_directories('.'),
   compile_args : extra_args
-).partial_dependency(includes : 'true', compile_args : true)
+).partial_dependency(includes : true, compile_args : true)
 
 test('test c_array_support',
   executable('test_c_array_support', 'tests/test_array_support.cpp',
