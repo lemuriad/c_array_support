@@ -37,21 +37,24 @@ concept c_array_unpadded =
        c_array<A>
     && sizeof(A) == flat_size<A> * sizeof(std::remove_all_extents_t<
                                                std::remove_cvref_t<A>>);
-
-// flat_cast_t<A>: the type of the flattened array A
-template <c_array_unpadded A, typename E = std::remove_all_extents_t<
-                                            std::remove_reference_t<A>>>
-using flat_cast_t = E[flat_size<A>];
-
 namespace impl {
-template<class T>extern std::remove_all_extents_t<T> flat_elem_t;
-template<class T>extern std::remove_all_extents_t<T>& flat_elem_t<T&>;
-template<class T>extern std::remove_all_extents_t<T>&& flat_elem_t<T&&>;
+template<class A>extern std::remove_all_extents_t<A> flat_elem_t;
+template<class A>extern std::remove_all_extents_t<A>& flat_elem_t<A&>;
+template<class A>extern std::remove_all_extents_t<A>&& flat_elem_t<A&&>;
+
+template<class A, class E>extern E flat_cast_t[flat_size<A>];
+template<class A, class E>extern E (&flat_cast_t<A&,E>)[flat_size<A>];
+template<class A, class E>extern E (&&flat_cast_t<A&&,E>)[flat_size<A>];
 }
 
 // flat_element_t<T> remove_all_extents, under any reference qual
 template <typename T>
 using flat_element_t = decltype(impl::flat_elem_t<T>);
+
+// flat_cast_t<A>: the type of the flattened array A
+template <c_array_unpadded A, typename E = std::remove_all_extents_t<
+                                            std::remove_reference_t<A>>>
+using flat_cast_t = decltype(impl::flat_cast_t<A,E>);
 
 // same_extents_v<A,B>: trait to tell if A and B have the same extents;
 // array types with the same extents or both rank 0 (non-array) types
@@ -109,10 +112,8 @@ constexpr auto&& flat_index(Ar&& a, std::size_t i = 0) noexcept
             return (R)flat_index( SUBSCRIP(static_cast<Ar&&>(a),i/N), i%N);
         }
     }
-    else if constexpr (std::is_reference_v<Ar>)
-        return (R)SUBSCRIP(reinterpret_cast<flat_cast_t<Ar>&>(a),i);
     else
-        return (R)SUBSCRIP(reinterpret_cast<flat_cast_t<Ar>&&>(a),i);
+        return (R)SUBSCRIP(reinterpret_cast<flat_cast_t<Ar&&>>(a),i);
 }
 
 #undef SUBSCRIP

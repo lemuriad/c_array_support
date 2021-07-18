@@ -18,8 +18,12 @@ static_assert( ltl::flat_size<int[2][3][4][5]> == 120 );
 static_assert( ltl::flat_size<char[1][2][3][4][5][6]> == 720 );
 static_assert( ltl::flat_size<int[1][2][3][4][5][6][7]> == 5040 );
 
-static_assert( std::is_same_v<ltl::flat_cast_t<int const(&&)[2][3]>,
+static_assert( std::is_same_v<ltl::flat_cast_t<int[2][3]>,
+                                               int[6]> );
+static_assert( std::is_same_v<ltl::flat_cast_t<int const[2][3]>,
                                                int const[6]> );
+static_assert( std::is_same_v<ltl::flat_cast_t<int const(&&)[2][3]>,
+                                               int const(&&)[6]> );
 
 // same_extents_v<A,B> trait tests
 
