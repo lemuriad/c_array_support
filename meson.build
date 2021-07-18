@@ -8,13 +8,16 @@ c_array_support_dep = declare_dependency(
 )
     
 test('test c_array_support',
-  executable('test_c_array_support', 'tests/test_array_support.cpp')
+  executable('test_c_array_support', 'tests/test_array_support.cpp',
+  dependencies : [c_array_support_dep])
 )
 
 test('test array_compare',
-  executable('test_array_compare', 'tests/test_array_compare.cpp')
+  executable('test_array_compare', 'tests/test_array_compare.cpp',
+  dependencies : [c_array_support_dep])
 )
 
 test('test array_assign',
-  executable('test_array_assign', 'tests/test_array_assign.cpp')
+  executable('test_array_assign', 'tests/test_array_assign.cpp',
+  dependencies : [c_array_support_dep])
 )
