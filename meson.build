@@ -14,12 +14,12 @@ endif
 c_array_support_dep = declare_dependency(
   include_directories : include_directories('.'),
   compile_args : extra_args
-)
-    
+).partial_dependency(includes : 'true', compile_args : true)
+
 test('test c_array_support',
   executable('test_c_array_support', 'tests/test_array_support.cpp',
   dependencies : [c_array_support_dep])
-).partial_dependency(includes : 'true', compile_args : true)
+)
 
 test('test array_compare',
   executable('test_array_compare', 'tests/test_array_compare.cpp',
