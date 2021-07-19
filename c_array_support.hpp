@@ -37,14 +37,23 @@ concept c_array_unpadded =
        c_array<A>
     && sizeof(A) == flat_size<A> * sizeof(std::remove_all_extents_t<
                                                std::remove_cvref_t<A>>);
+// c_array_t<T,I...> is an alias to array type T[I][...]
+namespace impl { template <typename T, int...> extern T c_array_tv; }
+//
+template <typename T, int... I>
+using c_array_t = decltype(impl::c_array_tv<T,I...>);
+//
+template <typename T, int J, int...I>
+extern c_array_t<T,I...> impl::c_array_tv<T,J,I...>[J];
+
 namespace impl {
 template<class A>extern std::remove_all_extents_t<A> flat_elem_t;
 template<class A>extern std::remove_all_extents_t<A>& flat_elem_t<A&>;
 template<class A>extern std::remove_all_extents_t<A>&& flat_elem_t<A&&>;
 
-template<class A, class E>extern E flat_cast_t[flat_size<A>];
-template<class A, class E>extern E (&flat_cast_t<A&,E>)[flat_size<A>];
-template<class A, class E>extern E (&&flat_cast_t<A&&,E>)[flat_size<A>];
+template<class A, class E>extern c_array_t<E,flat_size<A>> flat_cast_t;
+template<class A, class E>extern c_array_t<E,flat_size<A>>& flat_cast_t<A&,E>;
+template<class A, class E>extern c_array_t<E,flat_size<A>>&& flat_cast_t<A&&,E>;
 }
 
 // flat_element_t<T> remove_all_extents, under any reference qual
@@ -63,15 +72,6 @@ inline constexpr bool same_extents_v =
       (std::rank_v<A> == 0 && std::rank_v<B> == 0)
    || (std::extent_v<A> == std::extent_v<B>
     && same_extents_v<std::remove_extent_t<A>,std::remove_extent_t<B>>);
-
-// c_array_t<T,I...> is an alias to array type T[I][...]
-namespace impl { template <typename T, int...> extern T c_array_tv; }
-//
-template <typename T, int... I>
-using c_array_t = decltype(impl::c_array_tv<T,I...>);
-//
-template <typename T, int J, int...I>
-extern c_array_t<T,I...> impl::c_array_tv<T,J,I...>[J];
 
 // subscript(a,i): returns a[i], an rvalue if arg 'a' is an array rvalue
 //  workaround for MSVC https://developercommunity.visualstudio.com/t/

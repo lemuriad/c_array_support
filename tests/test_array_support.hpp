@@ -2,6 +2,12 @@
 
 // c_array<T> concept tests
 
+#if defined (MSV_VER)
+#define EXCLUDE_MSVC(...)
+#else
+#define EXCLUDE_MSVC(...) __VA_ARGS__
+#endif
+
 static_assert( ltl::c_array<int[2]> );
 static_assert( ltl::c_array<int(&)[2]> );
 static_assert( ltl::c_array<int const(&&)[2]> );
@@ -42,8 +48,8 @@ inline constexpr int cint2[2] {1,2};
 
 // subscript(a,i) tests
 
-static_assert( ltl::subscript(int2{1,2}) == 1 );
-static_assert( ltl::subscript(int2{1,2},1) == 2 );
+EXCLUDE_MSVC(static_assert( ltl::subscript(int2{1,2}) == 1 ));
+EXCLUDE_MSVC(static_assert( ltl::subscript(int2{1,2},1) == 2 ));
 static_assert( ltl::subscript(cint2) == 1 );
 static_assert( ltl::subscript(cint2,1) == 2 );
 
@@ -56,8 +62,8 @@ static_assert( std::is_same_v< decltype(ltl::subscript(cint2)),
 
 // flat_index(a,i) tests
 
-static_assert( ltl::flat_index(int2{1,2}) == 1 );
-static_assert( ltl::flat_index(int2{1,2},1) == 2 );
+EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2}) == 1 ));
+EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2},1) == 2 ));
 static_assert( ltl::flat_index(cint2) == 1 );
 static_assert( ltl::flat_index(cint2,1) == 2 );
 
@@ -78,7 +84,7 @@ static_assert( ltl::flat_index(int23{{1,2,3},{4,5,6}},3) == 4 );
 static_assert( ltl::flat_index(cint23) == 1 );
 static_assert( ltl::flat_index(cint23,4) == 5 );
 
-static_assert( ltl::flat_index(int2{1,2},1) == 2 );
+EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2},1) == 2 ));
 static_assert( ltl::flat_index(cint2,1) == 2 );
 
 static_assert( std::is_same_v< decltype(ltl::flat_index(int2{})),
