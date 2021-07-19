@@ -28,7 +28,7 @@ jobs:
             build_type: RelWithDebInfo,
             cc: "gcc-11", cxx: "g++-11",
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
-          }          }
+          }
         - {
             name: "Linux Clang 12 Rel(C++20)", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
