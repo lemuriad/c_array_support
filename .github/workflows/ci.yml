@@ -70,7 +70,8 @@ jobs:
     - run: pip install meson ninja
     - run: meson setup ${{ matrix.compiler }}/
       env:
-        CC: ${{ matrix.cc }}, CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.cc }},
+        CXX: ${{ matrix.cxx }}
     - run: meson test -C ${{ matrix.compiler }}/ -v
 
 #  macos:
