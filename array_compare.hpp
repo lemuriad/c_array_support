@@ -196,8 +196,7 @@ struct equal_to
         }
     }
     template <typename A>
-    constexpr bool operator()(A const& l, A const& r) const noexcept(
-      noexcept(operator()<A const&, A const&>(l,r)))
+    constexpr bool operator()(A const& l, A const& r) const noexcept
     {   return operator()<A const&, A const&>(l,r);  }
 
     using is_transparent = void;
@@ -217,8 +216,7 @@ struct not_equal_to
         return ! equal_to{}((L&&)l, (R&&)r);
     }
     template <typename A>
-    constexpr bool operator()(A const& l, A const& r) const noexcept(
-      noexcept(operator()<A const&, A const&>(l,r)))
+    constexpr bool operator()(A const& l, A const& r) const noexcept
     {   return operator()<A const&, A const&>(l,r);  }
 
     using is_transparent = void;
@@ -258,8 +256,7 @@ struct less
       }
     }
     template <typename A>
-    constexpr bool operator()(A const& l, A const& r) const noexcept(
-      noexcept(operator()<A const&, A const&>(l,r)))
+    constexpr bool operator()(A const& l, A const& r) const noexcept
     {   return operator()<A const&, A const&>(l,r);  }
 
     using is_transparent = void;
