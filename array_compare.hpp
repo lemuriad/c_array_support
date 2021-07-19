@@ -267,6 +267,12 @@ struct less
 
 #undef UINTPTR_T
 
+// detect gcc bug 93480
+inline constexpr bool GCC_ARRAY_COMPARE_WORKAROUND = []{
+  struct A { int v[1]; bool operator==(A const&) const = default; };
+  return A{} != A{}; // evaluates true with gcc bug #93480
+}();
+
 // Trait to check if member of type T can have defaulted <=>
 template <typename T>
 inline constexpr bool member_default_3way = []
@@ -280,6 +286,9 @@ template <typename T>
 inline constexpr bool member_default_equality = []
 {
   struct C { T v; bool operator==(C const&) const = default; };
+if constexpr (std::is_array_v<T> && GCC_ARRAY_COMPARE_WORKAROUND)
+  return false;
+else
   return std::equality_comparable<C>;
 }();
 
