@@ -2,7 +2,7 @@
 
 // c_array<T> concept tests
 
-#if defined (MSV_VER)
+#if defined (MSC_VER)
 #define EXCLUDE_MSVC(...)
 #else
 #define EXCLUDE_MSVC(...) __VA_ARGS__
