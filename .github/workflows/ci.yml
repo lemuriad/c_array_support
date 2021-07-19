@@ -56,7 +56,7 @@ jobs:
         - {
             name: "Windows MSVC 2019 Rel (C++20)", artifact: "Windows-MSVC.tar.xz",
             os: windows-latest,
-            compiler: msvc
+            compiler: msvc,
             build_type: RelWithDebInfo,
             cc: "cl", cxx: "cl",
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
