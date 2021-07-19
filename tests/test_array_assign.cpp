@@ -4,7 +4,10 @@
 
 int main() {
   wrap<int> wi{2};
+  auto& [wiv] = wi;
+  assert( wiv == 2 );
   ltl::assign{}(wi);
-  auto [wiv] = wi;
   assert( wiv == 0 );
+  ltl::assign{}(wi,{2});
+  assert( wiv == 2 );
 }
