@@ -1,14 +1,14 @@
 project('c_array_support', 'cpp',
-  default_options : ['cpp_std=c++20','warning_level=3'],
+  default_options : ['warning_level=3'],
   version : '0.1'
 )
 
 if meson.get_compiler('cpp').get_id() == 'msvc'
-  extra_args = ['std:c++latest','/Zc:preprocessor']
+  extra_args = ['/std:c++latest','/Zc:preprocessor']
 elif meson.get_compiler('cpp').get_id() == 'clang'
-  extra_args = []
+  extra_args = ['-std=c++20']
 else
-  extra_args = []
+  extra_args = ['-std=c++20']
 endif
 
 c_array_support_dep = declare_dependency(

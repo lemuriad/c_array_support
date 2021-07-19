@@ -16,10 +16,52 @@ on:
       - "**.hpp"
 jobs:
   linux:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       matrix:
-        compiler: [g++-11, clang++-12]
+        config:
+        - {
+            name: "Linux GCC 11 Rel (C++20)", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            compiler: gcc-11,
+            build_type: RelWithDebInfo,
+            cc: "gcc-11", cxx: "g++-11",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }          }
+        - {
+            name: "Linux Clang 12 Rel(C++20)", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            compiler: clang-12,
+            build_type: RelWithDebInfo,
+            cc: "clang-12", cxx: "clang++-12",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }
+        - {
+            name: "macOS GCC Rel (C++20)", artifact: "macOS.tar.xz",
+            os: macos-latest,
+            compiler: gcc-11,
+            build_type: RelWithDebInfo,
+            cc: "gcc", cxx: "g++",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }
+        - {
+            name: "macOS Clang Rel (C++20)", artifact: "macOS.tar.xz",
+            os: macos-latest,
+            compiler: clang-12,
+            build_type: RelWithDebInfo,
+            cc: "clang", cxx: "clang++",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }
+        - {
+            name: "Windows MSVC 2019 Rel (C++20)", artifact: "Windows-MSVC.tar.xz",
+            os: windows-latest,
+            compiler: msvc
+            build_type: RelWithDebInfo,
+            cc: "cl", cxx: "cl",
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -28,7 +70,7 @@ jobs:
     - run: pip install meson ninja
     - run: meson setup ${{ matrix.compiler }}/
       env:
-        CXX: ${{ matrix.compiler }}
+        CC: ${{ matrix.cc }}, CXX: ${{ matrix.cxx }}
     - run: meson test -C ${{ matrix.compiler }}/ -v
 
 #  macos:
@@ -43,14 +85,14 @@ jobs:
 #    - run: meson setup build/
 #    - run: meson test -C build/ -v
 
-  windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - run: pip install meson ninja
-    - uses: ilammy/msvc-dev-cmd@v1
-    - run: meson setup build
-    - run: meson test -C build -v
+#  windows:
+#    runs-on: windows-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#    - uses: actions/setup-python@v2
+#      with:
+#        python-version: '3.x'
+#    - run: pip install meson ninja
+#    - uses: ilammy/msvc-dev-cmd@v1
+#    - run: meson setup build
+#    - run: meson test -C build -v
