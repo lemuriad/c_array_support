@@ -80,9 +80,9 @@ concept assignable_from =
 struct assign
 {
   template <typename L>
-    requires default_assignable<L&>
-  constexpr L& operator()(L& l) const
-    noexcept(noexcept(flat_index(l)={}))
+    requires default_assignable<L&&>
+  constexpr L&& operator()(L&& l) const
+    noexcept(noexcept(flat_index((L&&)l)={}))
   {
     if constexpr (!c_array<L>)
       return l = {};
@@ -94,9 +94,9 @@ struct assign
   }
 
   template <typename L, typename R>
-    requires assignable_from<L&,R&&>
-  constexpr L& operator()(L& l, R&& r) const
-    noexcept(noexcept(flat_index((L&&)l) = flat_index((R&&)r)))
+    requires assignable_from<L&&,R&&>
+  constexpr L& operator()(L&& l, R&& r) const
+    noexcept(noexcept(flat_index(l) = flat_index((R&&)r)))
   {
     if constexpr (! c_array<L>)
       return l = (R&&)r;
@@ -108,8 +108,8 @@ struct assign
   }
 
   template <typename L>
-  constexpr L& operator()(L& l, L const& r) noexcept(
-    noexcept(operator()<L&, L const&>(l,r)))
+  constexpr L& operator()(L& l, L const& r)
+    noexcept(noexcept(flat_index(l) = flat_index(r)))
   {   return operator()<L&, L const&>(l,r);   }
 };
 
