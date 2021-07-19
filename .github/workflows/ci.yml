@@ -68,11 +68,11 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install meson ninja
-    - run: meson setup ${{ matrix.compiler }}/
+    - run: meson setup ${{ matrix.config.compiler }}/
       env:
-        CC: ${{ matrix.cc }},
-        CXX: ${{ matrix.cxx }}
-    - run: meson test -C ${{ matrix.compiler }}/ -v
+        CC: ${{ matrix.config.cc }},
+        CXX: ${{ matrix.config.cxx }}
+    - run: meson test -C ${{ matrix.config.compiler }}/ -v
 
 #  macos:
 #    runs-on: macos-latest
