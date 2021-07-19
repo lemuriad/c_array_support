@@ -23,8 +23,8 @@ static_assert( ! ltl::pointer_equality_comparable_with<int[2],int[4]> );
 
 static_assert( ltl::same_extents_v<I2,L2> );
 
-static_assert( ! std::three_way_comparable<A>
-              && ltl::three_way_comparable<A>);
+static_assert( ! std::three_way_comparable<I2>
+              && ltl::three_way_comparable<I2>);
 
 static_assert( ! std::three_way_comparable_with<I2,I2>
               && ltl::three_way_comparable_with<I2,I2>);
@@ -33,12 +33,12 @@ static_assert( ! std::three_way_comparable_with<I2,I2>
               && ltl::three_way_comparable_with<I2,L2>
               && ltl::three_way_comparable_with<I2 const& ,L2 const&>);
 
-static_assert( ltl::equality_comparable<A>);
+static_assert( ltl::equality_comparable<I2>);
 
 static_assert( ! std::equality_comparable_with<I2,L2>
               && ltl::equality_comparable_with<I2,L2>);
 
-static_assert( ltl::totally_ordered<A>);
+static_assert( ltl::totally_ordered<I2>);
 
 static_assert( ! std::totally_ordered_with<I2,L2>
               && ltl::totally_ordered_with<I2,L2>);
@@ -56,32 +56,32 @@ static_assert( ! std::three_way_comparable<std::nullptr_t>
 static_assert( ltl::equal_to{}(std::nullptr_t{}, std::nullptr_t{}) );
 
 
-static_assert( ltl::compare_three_way{}(A{0,1},A{0,1}) == 0);
-static_assert( ltl::compare_three_way{}(A{0,1},A{1,0}) < 0);
-static_assert( ltl::compare_three_way{}(A{0,1},A{0,0}) > 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},I2{0,1}) == 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},I2{1,0}) < 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},I2{0,0}) > 0);
 
-static_assert( ltl::compare_three_way{}(A{0,1},a) == 0);
-static_assert( ltl::compare_three_way{}(a,     A{0,1}) == 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},a) == 0);
+static_assert( ltl::compare_three_way{}(a,     I2{0,1}) == 0);
 static_assert( ltl::compare_three_way{}(aa    ,a) == 0);
-static_assert( ltl::compare_three_way{}(a,     A{1,0}) < 0);
-static_assert( ltl::compare_three_way{}(A{0,1},A{0,0}) > 0);
+static_assert( ltl::compare_three_way{}(a,     I2{1,0}) < 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},I2{0,0}) > 0);
 
-static_assert( ltl::compare_three_way{}(A{0,1}, {0,1}) == 0);
-static_assert( ltl::compare_three_way{}(A{0,1}, {1,0}) < 0);
-static_assert( ltl::compare_three_way{}(A{0,1}, {0,0}) > 0);
+static_assert( ltl::compare_three_way{}(I2{0,1}, {0,1}) == 0);
+static_assert( ltl::compare_three_way{}(I2{0,1}, {1,0}) < 0);
+static_assert( ltl::compare_three_way{}(I2{0,1}, {0,0}) > 0);
 
-static_assert( ltl::compare_three_way{}(A{0,1},L2{0,1}) == 0);
-static_assert( ltl::compare_three_way{}(A{0,1},L2{1,0}) < 0);
-static_assert( ltl::compare_three_way{}(A{0,1},L2{0,0}) > 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},L2{0,1}) == 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},L2{1,0}) < 0);
+static_assert( ltl::compare_three_way{}(I2{0,1},L2{0,0}) > 0);
 
 static_assert( ltl::equal_to{}(a,a) );
 static_assert( ltl::equal_to{}(a,aa) );
-static_assert( ltl::equal_to{}(A{0,1},A{0,1}) );
-static_assert( ! ltl::equal_to{}(A{0,1},A{1,0}) );
-static_assert( ! ltl::equal_to{}(A{0,1},A{0,0}) );
+static_assert( ltl::equal_to{}(I2{0,1},I2{0,1}) );
+static_assert( ! ltl::equal_to{}(I2{0,1},I2{1,0}) );
+static_assert( ! ltl::equal_to{}(I2{0,1},I2{0,0}) );
 
 static_assert( ltl::equal_to{}(a,b) );
-static_assert( ltl::equal_to{}(A{0,1},L2{0,1}) );
+static_assert( ltl::equal_to{}(I2{0,1},L2{0,1}) );
 
 static_assert(   ltl::member_default_3way<int> );
 static_assert(   ltl::member_default_3way<int[2]>
