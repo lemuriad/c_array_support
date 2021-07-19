@@ -84,12 +84,14 @@ static_assert( ltl::equal_to{}(a,b) );
 static_assert( ltl::equal_to{}(A{0,1},B{0,1}) );
 
 static_assert(   ltl::member_default_3way<int> );
-static_assert(   ltl::member_default_3way<int[2]> );
+static_assert(   ltl::member_default_3way<int[2]>
+              || ltl::GCC10_ARRAY_COMPARE_WORKAROUND);
 static_assert(   ltl::member_default_3way<int*> );
 static_assert( ! ltl::member_default_3way<int&> );
 
 static_assert(   ltl::member_default_equality<int> );
-static_assert(   ltl::member_default_equality<int[2]> );
+static_assert(   ltl::member_default_equality<int[2]>
+              || ltl::GCC10_ARRAY_COMPARE_WORKAROUND);
 static_assert(   ltl::member_default_equality<int*> );
 static_assert( ! ltl::member_default_equality<int&> );
 
