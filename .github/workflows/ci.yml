@@ -39,7 +39,7 @@ jobs:
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
           }
         - {
-            name: "macOS GCC Rel (C++20)", artifact: "macOS.tar.xz",
+            name: "macOS GCC 11 Rel (C++20)", artifact: "macOS.tar.xz",
             os: macos-latest,
             compiler: gcc-11,
             build_type: RelWithDebInfo,
@@ -47,11 +47,11 @@ jobs:
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
           }
         - {
-            name: "macOS Clang Rel (C++20)", artifact: "macOS.tar.xz",
+            name: "macOS Clang 12 Rel (C++20)", artifact: "macOS.tar.xz",
             os: macos-latest,
-            compiler: clang-12,
+            compiler: clang,
             build_type: RelWithDebInfo,
-            cc: "clang-12", cxx: "clang++-12",
+            cc: "clang", cxx: "clang++",
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
           }
         - {
