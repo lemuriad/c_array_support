@@ -1,12 +1,12 @@
 project('c_array_support', 'cpp',
-  default_options : ['cpp_std=c++2a','warning_level=3'],
+  default_options : ['cpp_std=c++20','warning_level=3'],
   version : '0.1'
 )
 
 if meson.get_compiler('cpp').get_id() == 'msvc'
   extra_args = ['std:c++latest','/Zc:preprocessor']
 elif meson.get_compiler('cpp').get_id() == 'clang'
-  extra_args = ['-std=c++20']
+  extra_args = []
 else
   extra_args = []
 endif
