@@ -15,7 +15,7 @@ on:
       - "**.cpp"
       - "**.hpp"
 jobs:
-  linux:
+  meson-build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -69,6 +69,7 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install meson ninja
+    - uses: ilammy/msvc-dev-cmd@v1
     - run: meson setup ${{ matrix.config.compiler }}/
       env:
         CC: ${{ matrix.config.cc }},
