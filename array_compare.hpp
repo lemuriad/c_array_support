@@ -270,26 +270,29 @@ inline constexpr bool GCC10_ARRAY_COMPARE_WORKAROUND = []{
   return A{} != A{}; // evaluates true with gcc bug #93480
 }();
 
+template <typename T> struct member_default_3way_t
+{ T v; auto operator<=>(member_default_3way_t const&) const = default; };
+
 // Trait to check if member of type T can have defaulted <=>
 template <typename T>
 inline constexpr bool member_default_3way = []
 {
-  struct C { T v; auto operator<=>(C const&) const = default; };
   if constexpr (std::is_array_v<T> && GCC10_ARRAY_COMPARE_WORKAROUND)
     return false;
   else
-    return std::three_way_comparable<C>;
+    return std::three_way_comparable<member_default_3way_t<T>>;
 }();
 
+template <typename T> struct member_default_equality_t
+{ T v; bool operator==(member_default_equality_t const&) const = default; };
 // Trait to check if member of type T can have defaulted ==
 template <typename T>
 inline constexpr bool member_default_equality = []
 {
-  struct C { T v; bool operator==(C const&) const = default; };
   if constexpr (std::is_array_v<T> && GCC10_ARRAY_COMPARE_WORKAROUND)
     return false;
   else
-    return std::equality_comparable<C>;
+    return std::equality_comparable<member_default_equality_t<T>>;
 }();
 
 #include "namespace.hpp"

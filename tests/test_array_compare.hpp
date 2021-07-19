@@ -7,7 +7,7 @@
 #endif
 
 constexpr int a22[2][2] {{0,1},{2,3}};
-static_assert( ltl::compare_three_way{}(a22, {{0,1},{2,2}}) > 0 );
+EXCLUDE_MSVC(static_assert( ltl::compare_three_way{}(a22, {{0,1},{2,2}}) > 0 );)
 
 using I2 = int[2];
 using L2 = long[2];
@@ -28,7 +28,7 @@ static_assert( ! ltl::equality_comparable_with<int[2],int[4]> );
 static_assert( ! ltl::pointer_equality_comparable_with<int[2],int[4]> );
 
 static_assert( ltl::same_extents_v<I2,L2> );
-
+EXCLUDE_MSVC(
 static_assert( ! std::three_way_comparable<I2>
               && ltl::three_way_comparable<I2>);
 
@@ -38,7 +38,7 @@ static_assert( ! std::three_way_comparable_with<I2,I2>
 static_assert( ! std::three_way_comparable_with<I2,I2>
               && ltl::three_way_comparable_with<I2,L2>
               && ltl::three_way_comparable_with<I2 const& ,L2 const&>);
-
+)
 static_assert( ltl::equality_comparable<I2>);
 
 static_assert( ! std::equality_comparable_with<I2,L2>
