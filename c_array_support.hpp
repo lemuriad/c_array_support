@@ -40,8 +40,6 @@ concept c_array_unpadded =
 //
 namespace impl {
 template <typename T, int...> extern T c_array_tv;
-template <typename T, int J, int...I>
-extern decltype(c_array_tv<T,I...>) c_array_tv<T,J,I...>[J];
 }
 //
 // c_array_t<T,I...> is an alias to array type T[I][...]
@@ -49,9 +47,13 @@ template <typename T, int... I>
 using c_array_t = decltype(impl::c_array_tv<T,I...>);
 //
 namespace impl {
+template <typename T, int J, int...I>
+extern c_array_t<T, I...> c_array_tv<T, J, I...>[J];
+
 template<typename RQ, typename T>
 using copy_ref = std::conditional_t<
                  std::is_lvalue_reference_v<RQ>, T&, T&&>;
+
 template<typename Q, typename T>
 using copy_qual = std::conditional_t<
                  std::is_reference_v<Q>, copy_ref<Q,T>, T>;
