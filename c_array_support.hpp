@@ -100,12 +100,6 @@ constexpr auto&& subscript(A&& a, std::size_t i = 0) noexcept
         return impl_::mv(a[i]);
 }
 
-#if defined (MSC_VER)
-#define SUBSCRIP(a,i) subscript(a,i)
-#else
-#define SUBSCRIP(a,i) (a)[i]
-#endif
-
 template <typename E, int N>
 constexpr auto& flat_index_recurse(E(&a)[N], std::size_t i = 0) noexcept
 {
@@ -135,8 +129,6 @@ constexpr auto flat_index(Ar&& a, std::size_t i = 0) noexcept
 template <typename A> requires (! c_array<A>)
 constexpr auto&& flat_index(A&& a) noexcept
       { return static_cast<A&&>(a); }
-
-#undef SUBSCRIP
 
 #include "namespace.hpp"
 
