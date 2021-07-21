@@ -48,8 +48,8 @@ inline constexpr int cint2[2] {1,2};
 
 // subscript(a,i) tests
 
-EXCLUDE_MSVC(static_assert( ltl::subscript(int2{1,2}) == 1 ));
-EXCLUDE_MSVC(static_assert( ltl::subscript(int2{1,2},1) == 2 ));
+static_assert( ltl::subscript(int2{1,2}) == 1 );
+static_assert( ltl::subscript(int2{1,2},1) == 2 );
 static_assert( ltl::subscript(cint2) == 1 );
 static_assert( ltl::subscript(cint2,1) == 2 );
 
@@ -62,8 +62,8 @@ static_assert( std::is_same_v< decltype(ltl::subscript(cint2)),
 
 // flat_index(a,i) tests
 
-EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2}) == 1 ));
-EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2},1) == 2 ));
+static_assert( ltl::flat_index(int2{1,2}) == 1 );
+static_assert( ltl::flat_index(int2{1,2},1) == 2 );
 static_assert( ltl::flat_index(cint2) == 1 );
 static_assert( ltl::flat_index(cint2,1) == 2 );
 
@@ -84,7 +84,7 @@ static_assert( ltl::flat_index(int23{{1,2,3},{4,5,6}},3) == 4 );
 static_assert( ltl::flat_index(cint23) == 1 );
 static_assert( ltl::flat_index(cint23,4) == 5 );
 
-EXCLUDE_MSVC(static_assert( ltl::flat_index(int2{1,2},1) == 2 ));
+static_assert( ltl::flat_index(int2{1,2},1) == 2 );
 static_assert( ltl::flat_index(cint2,1) == 2 );
 
 static_assert( std::is_same_v< decltype(ltl::flat_index(int2{})),
