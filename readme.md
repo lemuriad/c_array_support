@@ -40,6 +40,10 @@ Also at [boost.org](http://www.boost.org/LICENSE_1_0.txt) and accompanying file 
 
 ### `c_array_support.hpp`, `array_compare.hpp`, `array_assign.hpp`
 
+github actions meson build:  
+linux gcc 11, linux clang 12, macos gcc 11, windows latest MSVC (19.29)  
+[![example workflow](https://github.com/willwray/c_array_support/actions/workflows/ci.yml/badge.svg)](https://github.com/willwray/c_array_support/actions) 
+
 ### [Documentation](#documentation.md) page
 
 ------------
