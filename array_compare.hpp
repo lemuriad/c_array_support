@@ -232,7 +232,7 @@ struct less
                 std::remove_all_extents_t<std::remove_reference_t<L>>,
                 std::remove_all_extents_t<std::remove_reference_t<R>>>)
     constexpr bool operator()(L&& l, R&& r) const
-      noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
+      noexcept(noexcept(flat_index((L&&)l) < flat_index((R&&)r)))
     {
       if constexpr (pointer_less_than_comparable_with<L,R>)
       {
@@ -256,8 +256,9 @@ struct less
       }
     }
     template <typename A>
-    constexpr bool operator()(A const& l, A const& r) const noexcept
-    {   return operator()<A const&, A const&>(l,r);  }
+    constexpr bool operator()(A const& l, A const& r) const noexcept(
+            noexcept(operator()<A const&, A const&>(l,r)))
+          {   return operator()<A const&, A const&>(l,r);  }
 
     using is_transparent = void;
 };
