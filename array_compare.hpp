@@ -113,7 +113,7 @@ concept totally_ordered_with =
      std::remove_all_extents_t<std::remove_reference_t<R>>>
   && same_extents_v<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
-template <typename L, typename R>
+template <typename L, typename R = L>
 using compare_three_way_result_t = 
  std::compare_three_way_result_t<
        std::remove_all_extents_t<std::remove_reference_t<L>>,

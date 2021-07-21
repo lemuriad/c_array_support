@@ -1,13 +1,18 @@
 #include "array_compare.hpp"
 
 #if defined (_MSC_VER)
-#define EXCLUDE_MSVC(...)
+#define ARRAY(...)
 #else
 #define EXCLUDE_MSVC(...) __VA_ARGS__
 #endif
 
-constexpr int a22[2][2] {{0,1},{2,3}};
-EXCLUDE_MSVC(static_assert( ltl::compare_three_way{}(a22, {{0,1},{2,2}}) > 0 );)
+constexpr int a01_23[2][2] {{0,1},{2,3}};
+constexpr int a01_22[2][2] {{0,1},{2,2}};
+static_assert( ltl::compare_three_way{}(a01_23, a01_22) > 0 );
+
+EXCLUDE_MSVC(
+static_assert( ltl::compare_three_way{}(a01_23, {{0,1},{2,2}}) > 0 );
+)
 
 using I2 = int[2];
 using L2 = long[2];
@@ -28,7 +33,7 @@ static_assert( ! ltl::equality_comparable_with<int[2],int[4]> );
 static_assert( ! ltl::pointer_equality_comparable_with<int[2],int[4]> );
 
 static_assert( ltl::same_extents_v<I2,L2> );
-EXCLUDE_MSVC(
+
 static_assert( ! std::three_way_comparable<I2>
               && ltl::three_way_comparable<I2>);
 
@@ -38,7 +43,7 @@ static_assert( ! std::three_way_comparable_with<I2,I2>
 static_assert( ! std::three_way_comparable_with<I2,I2>
               && ltl::three_way_comparable_with<I2,L2>
               && ltl::three_way_comparable_with<I2 const& ,L2 const&>);
-)
+
 static_assert( ltl::equality_comparable<I2>);
 
 static_assert( ! std::equality_comparable_with<I2,L2>
@@ -63,7 +68,6 @@ static_assert( ltl::equal_to{}(std::nullptr_t{}, std::nullptr_t{}) );
 
 static_assert( ltl::compare_three_way{}(aa    ,a) == 0);
 
-EXCLUDE_MSVC(
 static_assert( ltl::compare_three_way{}(I2{0,1},I2{0,1}) == 0);
 static_assert( ltl::compare_three_way{}(I2{0,1},I2{1,0}) < 0);
 static_assert( ltl::compare_three_way{}(I2{0,1},I2{0,0}) > 0);
@@ -80,19 +84,17 @@ static_assert( ltl::compare_three_way{}(I2{0,1}, {0,0}) > 0);
 static_assert( ltl::compare_three_way{}(I2{0,1},L2{0,1}) == 0);
 static_assert( ltl::compare_three_way{}(I2{0,1},L2{1,0}) < 0);
 static_assert( ltl::compare_three_way{}(I2{0,1},L2{0,0}) > 0);
-)
 
 static_assert( ltl::equal_to{}(a,a) );
 static_assert( ltl::equal_to{}(a,aa) );
-EXCLUDE_MSVC(
+
 static_assert( ltl::equal_to{}(I2{0,1},I2{0,1}) );
 static_assert( ! ltl::equal_to{}(I2{0,1},I2{1,0}) );
 static_assert( ! ltl::equal_to{}(I2{0,1},I2{0,0}) );
-)
+
 static_assert( ltl::equal_to{}(a,b) );
-EXCLUDE_MSVC(
 static_assert( ltl::equal_to{}(I2{0,1},L2{0,1}) );
-)
+
 static_assert(   ltl::member_default_3way<int> );
 static_assert(   ltl::member_default_3way<int[2]>
               || ltl::GCC10_ARRAY_COMPARE_WORKAROUND);
