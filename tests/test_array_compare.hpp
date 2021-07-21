@@ -1,7 +1,7 @@
 #include "array_compare.hpp"
 
 #if defined (_MSC_VER)
-#define ARRAY(...)
+#define EXCLUDE_MSVC(...)
 #else
 #define EXCLUDE_MSVC(...) __VA_ARGS__
 #endif
