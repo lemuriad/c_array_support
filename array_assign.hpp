@@ -77,41 +77,57 @@ concept assignable_from =
 
 // assign functor, includes array assignment unlike core language op=
 // assign(l) single-argument form is default-assign ={} (element-wise)
-struct assign
+template <typename L = void> struct assign_to {};
+
+template <typename L> concept assign_toable = requires {typename assign_to<L>::value_type; };
+
+template <c_array L> struct assign_to<L>
 {
-  template <typename L>
-    requires default_assignable<L&&>
-  constexpr L&& operator()(L&& l) const
-    noexcept(noexcept(flat_index((L&&)l)={}))
-  {
-    if constexpr (!c_array<L>)
-      return l = {};
-    else {
-      for (int i = 0; i != flat_size<L>; ++i)
-        flat_index(l,i) = {};
-      return l;
-    }
-  }
+    L& l;
 
-  template <typename L, typename R>
-    requires assignable_from<L&&,R&&>
-  constexpr L& operator()(L&& l, R&& r) const
-    noexcept(noexcept(flat_index(l) = flat_index((R&&)r)))
-  {
-    if constexpr (! c_array<L>)
-      return l = (R&&)r;
-    else {
-      for (int i = 0; i != flat_size<L>; ++i)
-        flat_index(l,i) = flat_index((R&&)r,i);
-      return l;
-    }
-  }
+    using value_type = std::remove_reference_t<L>;
 
-  template <typename L>
-  constexpr L& operator()(L& l, L const& r)
-    noexcept(noexcept(flat_index(l) = flat_index(r)))
-  {   return operator()<L&, L const&>(l,r);   }
+    constexpr assign_to const operator=(assign_to<>) const
+        noexcept(noexcept(flat_index(l) = {}))
+        requires default_assignable<L&>
+    {
+        for (int i = 0; i != flat_size<L>; ++i)
+            flat_index(l, i) = {};
+        return *this;
+    }
+
+    template <typename R>
+    requires assignable_from<L, R&&>
+        && same_extents_v<value_type, std::remove_cvref_t<R>>
+        constexpr assign_to const operator=(R&& r) const
+        noexcept(noexcept(flat_index(l) = flat_index((R&&)r)))
+    {
+        for (int i = 0; i != flat_size<L>; ++i)
+            flat_index(l, i) = flat_index((R&&)r, i);
+        return *this;
+    }
+
+    template <int N>
+    requires (N == std::extent_v<value_type>)
+        constexpr assign_to const operator=(std::remove_extent_t<value_type>const(&r)[N]) const
+        noexcept(noexcept(flat_index(l) = flat_index(r)))
+    {
+        return operator=<value_type const&>(r);
+    }
+
 };
+template <typename L> assign_to(L&&)->assign_to<L&&>;
+
+template <typename T>
+std::remove_reference_t<T> const& as_const(T&& v) { return v; }
+
+template <typename L>
+decltype(auto) assign(L&& l) {
+    if constexpr (assign_toable<L&&>)
+        return std::type_identity_t<assign_to<L&&> const>{l};
+    else
+        return (L&&)l;
+}
 
 #include "namespace.hpp"
 
