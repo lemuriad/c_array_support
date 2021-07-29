@@ -1,6 +1,6 @@
 project('c_array_support', 'cpp',
   default_options : ['warning_level=3'],
-  version : '0.3'
+  version : '0.5'
 )
 
 if get_option('allow_zero_size_array')
