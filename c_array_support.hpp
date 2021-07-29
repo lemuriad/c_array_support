@@ -46,24 +46,19 @@ Functions:
 
 #include "namespace.hpp"
 
-// ALLOW_ZERO_SIZE_ARRAY: option, provides a macro to silence warnings.
-
-// ALLOW_ZERO_SIZE_ARRAY( ... ): silence -pedantic warnings in ... block
-#ifdef ALLOW_ZERO_SIZE_ARRAY
-#undef ALLOW_ZERO_SIZE_ARRAY
+// ALLOW_ZERO_SIZE_ARRAY(...): silence -pedantic warnings in ... block
 #if defined(__clang__) || defined(__GNUG__)
-#   define ALLOW_ZERO_SIZE_ARRAY(...) \
+#   define ALLOW_ZERO_SIZE_ARRAY_(...) \
 _Pragma("GCC diagnostic push") \
 _Pragma("GCC diagnostic ignored \"-Wpedantic\"") \
 __VA_ARGS__ \
 _Pragma("GCC diagnostic pop")
 #else
-#   define ALLOW_ZERO_SIZE_ARRAY(X) \
+#   define ALLOW_ZERO_SIZE_ARRAY_(...) \
 __pragma(warning(push)) \
 __pragma(warning(disable:6246)) \
 __VA_ARGS__ \
 __pragma(warning(pop))
-#endif
 #endif
 
 inline namespace move {
