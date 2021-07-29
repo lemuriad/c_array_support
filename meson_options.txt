@@ -1,0 +1,2 @@
+option('allow_zero_size_array', type: 'boolean', value: true,
+    description: 'Provide ALLOW_ZERO_SIZE_ARRAY(...) macro.')

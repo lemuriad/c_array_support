@@ -3,6 +3,10 @@ project('c_array_support', 'cpp',
   version : '0.3'
 )
 
+if get_option('allow_zero_size_array')
+add_project_arguments('-DALLOW_ZERO_SIZE_ARRAY', language: 'cpp')
+endif
+
 if meson.get_compiler('cpp').get_id() == 'msvc'
   extra_args = ['/std:c++latest','/Zc:preprocessor']
 elif meson.get_compiler('cpp').get_id() == 'clang'
