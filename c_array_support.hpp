@@ -70,14 +70,17 @@ ALLOW_ZERO_SIZE_ARRAY
 template <typename T, int...>
 extern T c_array_tv;
 //
+template <typename T, int... I>
+using c_array_t = decltype(c_array_tv<T,I...>);
+//
 template <typename T, int J, int...I>
-extern decltype(c_array_tv<T,I...>) c_array_tv<T, J, I...>[J];
+extern c_array_t<T,I...> c_array_tv<T, J, I...>[J];
 )
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
 }// impl
 //
 template <typename T, int... I>
-using c_array_t = decltype(impl::c_array_tv<T,I...>);
+using c_array_t = impl::c_array_t<T,I...>;
 
 // is_array_v<A>
 // same as std::is_array_v but supports zero-size array
@@ -244,7 +247,7 @@ constexpr auto&& flat_index(c_array auto&& a, std::size_t i = 0) noexcept
   if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
       return static_cast<E>(flat_index_recurse(a,i));
   else
-      return static_cast<E>(reinterpret_cast<flat_cast_t<A>>(a)[i]);
+      return subscript(reinterpret_cast<flat_cast_t<A>>(a),i);
 }
 
 // flat_index(a) -> a;
