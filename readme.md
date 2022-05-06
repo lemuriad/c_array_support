@@ -48,25 +48,53 @@ linux gcc 11, linux clang 12, macos gcc 11, windows latest MSVC (19.29)
 
 ------------
 
-## c_array_support.hpp
+## `c_array_support.hpp`
 
-Depends on std `<type_traits>` header.
+Depends on std `<type_traits>` and C++20 features. 
+
+This header provides traits and utilities for handling C arrays in generic code such  
+as in `array_compare.hpp` and `array_assign.hpp` below.
+Nested arrays benefit  
+from helper functions that factor out recursions.
+
+(Nested C arrays are not much used in C++ but generic code should support them).
+
+Zero-size arrays: The utilities are carefully coded to accept `T[0]` where possible.  
+Standard `type_traits`   fail or give erroneous results for zero-size array, including  
+`std::is_array<int[0]>` which evaluates `false`,
+but zero-size array is an array!
+
+This header provides alternative implementations for std traits that work with `T[0]`.
+
+### Alternative versions of `std` traits, robust to `T[0]`
+
+>Note: this is not a complete set of replacements
+for failing `std` traits.  
+These provided traits are the ones that proved most useful so far.
+
+* `ltl::is_array_v`
+* `ltl::is_bounded_array_v`
+* `ltl::rank_v`
+* `ltl::remove_extent_t`
+* `ltl::remove_all_extents`
+* `ltl::remove_all_extents_t`
 
 ### Concepts
 
-* `ltl::c_array<T>`          matches C array (and references to array)
-* `ltl::c_array_unpadded<T>` matches C arrays with no padding (and refs)
+* `ltl::c_array<T>`          matches C array, including reference-to-array type
+* `ltl::c_array_unpadded<T>` matches C arrays with no padding
 
 ### Aliases
 
-* `ltl::c_array_t<T,N...>` maps variadic Args to array type -> `T[N][...]`
-* `ltl::flat_element_t<A>` remove_all_extents, under any reference qualification
-* `ltl::flat_cast_t<A>` maps possibly nested array `A` to flattened array type  
+* `ltl::c_array_t<T,N...>` maps variadic `N...` to array type -> `T[N][...]`
+* `ltl::extent_removed_t<A>` remove_extent, under any reference qualification
+* `ltl::all_extents_removed_t<A>` same for remove_all_extents
+* `ltl::flat_cast_t<A>` maps array `A` to flattened array type, preserving cvref
 
 ### Traits
 
 * `flat_size<A>` yields the total number of elements in flattened array `A`
-* `same_extents_v<A,B>` predicate to tell if `A` and `B` have the same extents
+* `same_extents<A,B>` predicate to tell if `A` and `B` have the same extents
 
 ### Functions
 
@@ -113,3 +141,11 @@ Depends on std `<concepts>`
 ### Functors
 
 * `ltl::assign` (no std equivalent)
+
+
+Zero-size arrays are disallowed in standard C and C++ (except in  array `new T[0]`).  
+Compilers support a C extension that admits zero-size array as the final member of  
+a struct (C99 standardized use of `T[]` for this purpose; FAM flexible array member).
+
+The worry is that adjacent same-type zero-size array objects would not be iterable.  
+C++20 `[[no_unique_address]]` attribute deals with this issue for empty classes.

@@ -9,66 +9,63 @@
 #define LTL_ARRAY_ASSIGN_HPP
 /*
   array_assign.hpp
- -=================-
+  ================
 
   Concepts, class template and function for making assignment generic,
-  primarily to facilitate C-array assignment (until such a time that C++
-  language rules are relaxed to allow more array copy semantics).
+  primarily to facilitate C array assignment (until such a time that C++
+  language rules are relaxed to allow more array copy semantics; P1997).
 
   Avoids <algorithm> or <functional> dependency; implements algorithms
-  equivalent to std::copy, for possibly nested arrays (currently lacks
-  optimizations such as memcpy specializations).
+  equivalent to std::ranges::copy, for possibly nested arrays (currently
+  lacks optimizations such as memcpy specializations).
 
-  Generic assignment is also useful for defining extended assignment
-  outside of class scope (as operator=(R) has to be a member function).
-  For example, tuple assignment allows implicit conversions of elements,
-  and has many special assignments which bloat its API and are better
-  defined externally with a means for extension by the user.
+  Generic assignment can also be used to define extensible assignment
+  outside of class scope (as operator= has to be a member function).
 
-  Concepts:
+ Concepts:
 
-    ltl::assignable_from         c.f. std::assignable_from
-    ltl::default_assignable      see below (no std equivalent)
-    ltl::assign_toable           see below (no std equivalent)
+   ltl::assignable_from         c.f. std::assignable_from
+   ltl::default_assignable      see below (no std equivalent)
+   ltl::assign_toable           see below (no std equivalent)
 
-    default_assignable<T> captures language concept that a value can be
-    'zero-init' assigned from an empty braced initializer list: v = {};
-    as implied by default_initializable<T> && assignable_from<T&, T>,
-    though class types can also model the concept with an operator=({}).
+   default_assignable<T> captures language concept that a value can be
+   assigned from an empty braced initializer list; v = {}
+   as implied by default_initializable<T> && assignable_from<T&, T>,
+   though class types can also model the concept with an operator=({}).
 
-  Class template:
-    ltl::assign_to<T> customization point for users to specialize,
-                      with operator=(R) overloads
-  Function:
-    ltl::assign(l,r) assign r to l
-                 (r may be a braced init list, empty for default-init)
+ Class template:
+   ltl::assign_to<T> customization point for users to specialize,
+                     with operator=(R) overloads
+ Function:
+   ltl::assign(l,r) assign r to l
+                (r may be a braced init list, empty for default-init)
 
-    ltl::assign(l) return assign_to<L> if extant else return l reference
+   ltl::assign(l) return assign_to<L> if extant else return l reference
 
-  Usage
-  =====
+ Usage
+ =====
 
-    int a[2], b[2];
-    ltl::assign(a) = {1,2}; // A reference-wrapper fpr assignment
-    ltl::assign(b,{3,4});
-    ltl::assign_to{a} = b;
-    ltl::assign(a) = {};
+   int a[2], b[2];
+   ltl::assign(a) = {1,2}; // A reference-wrapper fpr assignment
+   ltl::assign(b,{3,4});
+   ltl::assign_to{a} = b;
+   ltl::assign(a) = {};
 
-    template <ltl::default_assignable...T>
-    void clear(T&&...v) { (ltl::assign((T&&)v,{}), ...); }
+   template <ltl::default_assignable...T>
+   void clear(T&&...v) { (ltl::assign((T&&)v,{}), ...); }
 
-    template <typename L, typename R>
-      requires ltl::assignable_from<L&,R&&>
-    L& ass(L& l, R&& r) { return ltl::assign(l,(R&&)r); }
+   template <typename L, typename R>
+     requires ltl::assignable_from<L&,R&&>
+   L& ass(L& l, R&& r) { return ltl::assign(l,(R&&)r); }
   
   See the ltl::tupl implementation for its use in array member support.
 
-  Raison d'etre
-  =============
+ Raison d'etre
+ =============
   This header is a 'polyfill' for lack of generic assignment support,
   in the language or standard library.
 
-  C-array doesn't have copy semantics; in particular assignment:
+  C array doesn't have copy semantics; in particular assignment:
 
       int a[2];
       int b[2]{};
@@ -88,17 +85,18 @@
 
 template <typename T>
 concept default_assignable =
-  requires (flat_element_t<T> v) {
-    static_cast<flat_element_t<T>>(v) = {};
+  requires (all_extents_removed_t<T> v) {
+    static_cast<all_extents_removed_t<T>>(v) = {};
   };
 
 template <typename L, typename R>
 concept assignable_from =
-   std::assignable_from< flat_element_t<L>, flat_element_t<R> >
-&& same_extents_v<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+   std::assignable_from< all_extents_removed_t<L>, all_extents_removed_t<R> >
+&& same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
+//
 template <typename L> struct assign_to {};
 template <typename L> assign_to(L&&) -> assign_to<L&&>;
 
@@ -106,7 +104,8 @@ template <typename L> concept assign_toable =
   requires { typename assign_to<L>::value_type; };
 
 // assign_to specialization for array assignment
-// (note: operator=(R) -> L& always returns wrapped type, not wrapper)
+// (note: operator=(R) -> L& always returns unwrapped type, not wrapper)
+//
 template <c_array L>
 struct assign_to<L>
 {
@@ -116,6 +115,7 @@ struct assign_to<L>
   using remove_extent_t = std::remove_extent_t<value_type>;
 
   // operator=({}) overload for emtpy braced-init
+  //
   constexpr L& operator=(assign_to<void>) const
       noexcept(noexcept(flat_index(l) = {}))
     requires default_assignable<L&>
@@ -126,9 +126,10 @@ struct assign_to<L>
   }
 
   // operator=(lval) overload for array lvalues (and rvalue variables)
+  //
   template <c_array R>
     requires assignable_from<L, R&&>
-          && same_extents_v<value_type, std::remove_cvref_t<R>>
+          && same_extents<value_type, std::remove_cvref_t<R>>
   constexpr L& operator=(R&& r) const
       noexcept(noexcept(flat_index(l) = flat_index((R&&)r)))
   {
@@ -138,6 +139,7 @@ struct assign_to<L>
   }
 
   // operator=(rval) overload for array rvalue from braced-init
+  //
   template <int N>
     requires (N == std::extent_v<value_type>)
   constexpr L& operator=(remove_extent_t const(&r)[N]) const

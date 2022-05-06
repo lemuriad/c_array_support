@@ -32,7 +32,7 @@ static_assert( ltl::equality_comparable_with<int[2],int[2]> );
 static_assert( ! ltl::equality_comparable_with<int[2],int[4]> );
 static_assert( ! ltl::pointer_equality_comparable_with<int[2],int[4]> );
 
-static_assert( ltl::same_extents_v<I2,L2> );
+static_assert( ltl::same_extents<I2,L2> );
 
 static_assert( ! std::three_way_comparable<I2>
               && ltl::three_way_comparable<I2>);

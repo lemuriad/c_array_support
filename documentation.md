@@ -31,7 +31,7 @@ Unpadded nested arrays can be safely reinterpret cast to a flat array.
 
 * `ltl::c_array_t<T,N...>` maps variadic Args to array type -> `T[N][...]`
 
-* `ltl::flat_element_t<A>` remove_all_extents, under any reference qualification
+* `ltl::all_extents_removed_t<A>` remove_all_extents, under any reference qualification
 
 * `ltl::flat_cast_t<A>` maps possibly nested array `A` to flattened array type  
   
@@ -42,7 +42,7 @@ Unpadded nested arrays can be safely reinterpret cast to a flat array.
 * `flat_size<A>` yields the total number of elements in array `A`  
  (the product of extents of all ranks of `A`).
 
-* `same_extents_v<A,B>` predicate to tell if `A` and `B` have the same extents;  
+* `same_extents<A,B>` predicate to tell if `A` and `B` have the same extents;  
 either both array types with the same extents or both rank 0 (non-array) types.
 
 ### Functions

@@ -9,16 +9,15 @@
 #define LTL_ARRAY_COMPARE_HPP
 /*
   array_compare.hpp
- -=================-
+  =================
 
-   C-array supporting C++20 comparison concepts, aliases and functors.
-   (plus some detection traits)
+  C array supporting C++20 comparison concepts, aliases and functors.
 
-   Depends only on <compare> for three-way operator <=> comparisons.
+  Depends only on <compare> for three-way operator <=> comparisons.
 
   Avoids <algorithm> or <functional> dependency; implements algorithms
   equivalent to std::lexicographical_compare_three_way, ranges equality,
-  etc. tailored to C array with recursion for possibly nested  arrays
+  etc. tailored to C array with recursion for possibly nested arrays
   (lacks optimizations such as memcmp specializations).
 
   Concepts:
@@ -49,7 +48,7 @@
 
   Raison d'etre
   =============
-  C-array is not comparable, on its own, and C++20 doesn't go far enough
+  C array is not comparable, on its own, and C++20 doesn't go far enough
   to fix array comparison or to assist generic code in comparing arrays.
 
   C++20 introduces operator<=> for three way comparison and allows
@@ -59,8 +58,8 @@
   comparison functors std::ranges::equal_to, etc., do not support array,
   so this header provides lookalikes that support C array.
 
-  (Array-array comparison is deprecated in C++20, could be removed in 23
-   then fixed in C++26. Hopefully this header is a stopgap till then.)
+  (Array-array comparison is deprecated in C++20, so could be removed in
+   future and then fixed. Hopefully this header is a stopgap till then.)
 */
 
 #include <compare>
@@ -77,47 +76,41 @@
 #include "namespace.hpp"
 
 // comparable concepts extended to include array type
+//
 template <typename A, class Cat = std::partial_ordering>
 concept three_way_comparable =
-   std::three_way_comparable<std::remove_all_extents_t<
-                             std::remove_reference_t<A>>, Cat>;
+   std::three_way_comparable<all_extents_removed_t<A>, Cat>;
 
 template <typename L, typename R, class Cat = std::partial_ordering>
 concept three_way_comparable_with =
-   std::three_way_comparable_with<
-     std::remove_all_extents_t<std::remove_reference_t<L>>,
-     std::remove_all_extents_t<std::remove_reference_t<R>>, Cat>
-  && same_extents_v<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+   std::three_way_comparable_with<all_extents_removed_t<L>,
+                                  all_extents_removed_t<R>, Cat>
+  && same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
 template <typename A>
 concept equality_comparable =
-   std::equality_comparable<std::remove_all_extents_t<
-                            std::remove_reference_t<A>>>;
+   std::equality_comparable<all_extents_removed_t<A>>;
 
 template <typename L, typename R>
 concept equality_comparable_with =
-   std::equality_comparable_with<
-     std::remove_all_extents_t<std::remove_reference_t<L>>,
-     std::remove_all_extents_t<std::remove_reference_t<R>>>
-  && same_extents_v<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+   std::equality_comparable_with<all_extents_removed_t<L>,
+                                 all_extents_removed_t<R>>
+  && same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
 template <typename A>
 concept totally_ordered =
-   std::totally_ordered<std::remove_all_extents_t<
-                        std::remove_reference_t<A>>>;
+   std::totally_ordered<all_extents_removed_t<A>>;
 
 template <typename L, typename R>
 concept totally_ordered_with =
-   std::totally_ordered_with<
-     std::remove_all_extents_t<std::remove_reference_t<L>>,
-     std::remove_all_extents_t<std::remove_reference_t<R>>>
-  && same_extents_v<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+   std::totally_ordered_with<all_extents_removed_t<L>,
+                             all_extents_removed_t<R>>
+  && same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
 template <typename L, typename R = L>
 using compare_three_way_result_t = 
- std::compare_three_way_result_t<
-       std::remove_all_extents_t<std::remove_reference_t<L>>,
-       std::remove_all_extents_t<std::remove_reference_t<R>>>;
+ std::compare_three_way_result_t<all_extents_removed_t<L>,
+                                 all_extents_removed_t<R>>;
 
 // pointer_equality_comparable_with (NOT extended to array type)
 template <typename P, typename Q>
@@ -180,9 +173,8 @@ struct equal_to
 {
     template <typename L, typename R>
       requires (equality_comparable_with<L,R>
-             || pointer_equality_comparable_with<
-                std::remove_all_extents_t<std::remove_reference_t<L>>,
-                std::remove_all_extents_t<std::remove_reference_t<R>>>)
+             || pointer_equality_comparable_with<all_extents_removed_t<L>,
+                                                 all_extents_removed_t<R>>)
     constexpr bool operator()(L&& l, R&& r) const
       noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
     {
@@ -207,9 +199,8 @@ struct not_equal_to
 {
     template <typename L, typename R>
       requires (equality_comparable_with<L,R>
-             || pointer_equality_comparable_with<
-                std::remove_all_extents_t<std::remove_reference_t<L>>,
-                std::remove_all_extents_t<std::remove_reference_t<R>>>)
+             || pointer_equality_comparable_with<all_extents_removed_t<L>,
+                                                 all_extents_removed_t<R>>)
     constexpr bool operator()(L&& l, R&& r) const
       noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
     {
@@ -228,9 +219,8 @@ struct less
 {
     template <typename L, typename R>
       requires (totally_ordered_with<L,R>
-             || pointer_less_than_comparable_with<
-                std::remove_all_extents_t<std::remove_reference_t<L>>,
-                std::remove_all_extents_t<std::remove_reference_t<R>>>)
+             || pointer_less_than_comparable_with<all_extents_removed_t<L>,
+                                                  all_extents_removed_t<R>>)
     constexpr bool operator()(L&& l, R&& r) const
       noexcept(noexcept(flat_index((L&&)l) < flat_index((R&&)r)))
     {

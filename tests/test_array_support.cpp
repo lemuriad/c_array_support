@@ -1,5 +1,12 @@
 #include "test_array_support.hpp"
 
+//#include "ALLOW_ZERO_SIZE_ARRAY.hpp"
+//ALLOW_ZERO_SIZE_ARRAY
+//(
+//static_assert( std::is_same_v<std::decay_t<int[0]>,int[0]> );
+//)
+//#include "ALLOW_ZERO_SIZE_ARRAY.hpp"
+
 int main()
 {
     int mint2[2] {1,2};
@@ -31,5 +38,7 @@ int main()
  && ltl::flat_index(mint4213,8) == 8
  && ltl::flat_index(mint4213,23) == 3;
 
-  return ! flat_index_test;
+ return ! flat_index_test;
 }
+#if 0
+#endif
