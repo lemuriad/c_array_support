@@ -1,18 +1,9 @@
 #include "test_array_support.hpp"
 
-//#include "ALLOW_ZERO_SIZE_ARRAY.hpp"
-//ALLOW_ZERO_SIZE_ARRAY
-//(
-//static_assert( std::is_same_v<std::decay_t<int[0]>,int[0]> );
-//)
-//#include "ALLOW_ZERO_SIZE_ARRAY.hpp"
-
 int main()
 {
     int mint2[2] {1,2};
     int mint23[2][3] {{1,2,3},{4,5,6}};
-
-// flat_index has non is_constant_evaluated() code
 
     bool flat_index_test =
     ltl::flat_index(int23{{1,2,3},{4,5,6}}) == 1
@@ -40,5 +31,3 @@ int main()
 
  return ! flat_index_test;
 }
-#if 0
-#endif

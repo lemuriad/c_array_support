@@ -1,23 +1,21 @@
 #include "c_array_support.hpp"
 
-// c_array<T> concept tests
-
 using X = class X { X() = delete; }; // non-default constructible
 
 using int2 = int[2];
 using int23 = int[2][3];
 
-// ALLOW_ZERO_SIZE_ARRAY silences -pedantic warnings on gcc and clang
-// (Note: MSVC only requires type aliases to define concepts not traits)
+auto&& array_id(ltl::c_array auto&& a) { return (decltype(a))a; }
+
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
-ALLOW_ZERO_SIZE_ARRAY(
+
 using X0 = X[0];
 using X01 = X[0][1];
 using X012 = X[0][1][2];
 using int0 = int[0];
 using int01 = int[0][1];
 using int012 = int[0][1][2];
-)
+
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
 
 static_assert( ltl::rank_v<X> == 0 );
@@ -105,7 +103,7 @@ static_assert( std::is_same_v<ltl::remove_all_extents_t<X012>,X> );
 
 #ifndef _MSC_VER
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
-ALLOW_ZERO_SIZE_ARRAY( // MSVC doesn't support zero bounds beyond first
+ // MSVC doesn't support zero bounds beyond first
 using X00 = X[0][0];
 using X10 = X[1][0];
 using X20 = X[2][0];
@@ -114,7 +112,6 @@ using X001 = X[0][0][1];
 using X100 = X[1][0][0];
 using X102 = X[1][0][2];
 using X120 = X[1][2][0];
-)
 
 static_assert( std::is_same_v<ltl::c_array_t<X,0,0>,X00> );
 
@@ -166,6 +163,7 @@ static_assert( std::is_same_v<ltl::remove_all_extents_t<X001>,X> );
 static_assert( std::is_same_v<ltl::remove_all_extents_t<X100>,X> );
 static_assert( std::is_same_v<ltl::remove_all_extents_t<X102>,X> );
 static_assert( std::is_same_v<ltl::remove_all_extents_t<X120>,X> );
+
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
 #endif
 
@@ -187,6 +185,9 @@ static_assert( std::is_same_v< decltype(ltl::subscript(cint2)),
                                int const&> );
 
 // flat_index(a,i) tests
+
+static_assert( &ltl::flat_index(eint2) == &ltl::subscript(eint2) );
+static_assert( &ltl::flat_index(eint2) == &eint2[0] );
 
 static_assert( ltl::flat_index(int2{1,2}) == 1 );
 static_assert( ltl::flat_index(int2{1,2},1) == 2 );

@@ -30,3 +30,9 @@ test('array_assign',
   executable('test_array_assign', 'tests/test_array_assign.cpp',
   dependencies : [c_array_support_dep])
 )
+
+test('zero_size_array',
+  executable('test_zero_size_array', 'tests/test_zero_size_array.cpp',
+  dependencies : [c_array_support_dep],
+  override_options : ['warning_level=3', 'werror=true'])
+)

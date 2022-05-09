@@ -13,7 +13,7 @@
  
   c_array concept, type traits and utilities for handing C arrays.
 
-  Depends only on std <type_traits> and uses C++20 features. 
+  Depends on std <type_traits> and uses C++20 features. 
 
   C arrays are hard to handle, multidimensional arrays especially.
   Generic code ought to handle arrays but they're often neglected.
@@ -27,11 +27,12 @@
   This is an incomplete collection, including only tools that have
   proven useful so far in practice.
 
- Alternative versions of std traits that work for T[0]:
+ Replacement versions of std traits that work for T[0]:
+  (i.e. ltl::is_array_v replaces std::is_array_v, etc.)
 
-  - is_array_v    i.e. ltl::is_array_v replaces std::is_array_v, etc.
-  - is_bounded_array_v (more useful in practice than is_array_v)
-  - rank_v             (std::extent_v often works by accident)
+  - is_array_v
+  - is_bounded_array_v
+  - rank_v
   - remove_extent_t
   - remove_all_extents
   - remove_all_extents_t
@@ -40,19 +41,20 @@
   - c_array<A>: matches C array, including references to C array
   - c_array_unpadded<A>: matches unpadded C array, including references
 
+ Value traits:
+  - flat_size<A>: yields the total number of elements in flattened array A
+  - same_extents<A,B>: predicate to tell if A and B have the same extents
+
  Aliases:
   - c_array_t<T,I...>: template alias to C array type T[I][...]
   - extent_removed_t<A>: remove_extent, under any reference qualifier
   - all_extents_removed_t<T>: remove_all_extents, under any reference qual
   - flat_cast_t<A>: The type of the flattened array A, preserving cvref quals
 
- Value traits:
-  - flat_size<A>: yields the total number of elements in flattened array A
-  - same_extents<A,B>: predicate to tell if A and B have the same extents
-
  Functions:
+  - flat_cast(a)  returns 'flattened' 1D array type, preserving cvref quals.
   - subscript(a,i):    returns a[i], an rvalue if 'a' is an rvalue
-  - flat_index(a,i=0): returns element at i in flat_cast_t<decltype(a)>
+  - flat_index(a,i=0): returns element at i in flat_cast(a)
 */
 
 #include <type_traits>
@@ -65,8 +67,7 @@
 //
 namespace impl {
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
-ALLOW_ZERO_SIZE_ARRAY
-(
+
 template <typename T, int...>
 extern T c_array_tv;
 //
@@ -75,7 +76,7 @@ using c_array_t = decltype(c_array_tv<T,I...>);
 //
 template <typename T, int J, int...I>
 extern c_array_t<T,I...> c_array_tv<T, J, I...>[J];
-)
+
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
 }// impl
 //
@@ -147,7 +148,8 @@ inline constexpr auto rank_v = [] {
 }();
 
 // flat_size<A>: total number of elements in A
-//               the product of extents of all ranks of A
+// computed by recursion; the product of extents of all ranks of A
+// (and not by sizeof which may fail for zero-size arrays)
 //
 template <c_array Ar>
 inline constexpr auto flat_size = [] {
@@ -157,6 +159,15 @@ inline constexpr auto flat_size = [] {
          return std::extent_v<A> * flat_size<E>; // recurse
     else return std::extent_v<A>;
 }();
+
+// same_extents<A,B>: trait to tell if A and B have the same extents;
+// array types with the same extents or both rank 0 (non-array) types
+//
+template <typename A, typename B>
+inline constexpr bool same_extents =
+      (std::rank_v<A> == 0 && std::rank_v<B> == 0)
+   || (std::extent_v<A> == std::extent_v<B>
+    && same_extents<remove_extent_t<A>,remove_extent_t<B>>);
 
 // c_array_unpadded concept:
 // matches C array (and reference-to-array) that has no padding,
@@ -170,54 +181,71 @@ concept c_array_unpadded = c_array<A>
                              std::remove_cvref_t<A>>) == sizeof(A);
 
 namespace impl {
-// copy_ref<R,T> applies any reference qualifier on R to T
-//            => reference collapse if T is already a reference
+// apply_ref helper, constexpr-if keeps symbols shorter than conditional_t
 template<typename R, typename T>
-using copy_ref = std::conditional_t<std::is_reference_v<R>,
-                 std::conditional_t<std::is_lvalue_reference_v<R>,T&,T&&>,T>;
-}
+constexpr auto apply_ref = []{
+  if constexpr (std::is_reference_v<R>) {
+    if constexpr (std::is_lvalue_reference_v<R>)
+      return std::type_identity<T&>{};
+    else
+      return std::type_identity<T&&>{};
+  }
+  else
+    return std::type_identity<T>{};
+};
+} // impl
+
+// apply_ref<R,T> applies any reference qualifier on R to T
+//             => reference collapse if T is already a reference
+template<typename R, typename T>
+using apply_ref = typename decltype(impl::apply_ref<R,T>())::type;
 
 // extent_removed_t<T> remove_extent, under any reference qualifier
 //                e.g. extent_removed_t<int(&&)[1][2]> -> int(&&)[2]
 template <c_array A>
-using extent_removed_t = impl::copy_ref<A,remove_extent_t<
-                                     std::remove_reference_t<A>>>;
+using extent_removed_t = apply_ref<A,remove_extent_t<
+                                   std::remove_reference_t<A>>>;
 
 // all_extents_removed_t<T> remove_all_extents, under any reference qualifier
 //                     e.g. all_extents_removed_t<int(&)[1][2]> -> int&
 template <typename T>
-using all_extents_removed_t = impl::copy_ref<T,remove_all_extents_t<
-                                          std::remove_reference_t<T>>>;
+using all_extents_removed_t = apply_ref<T,remove_all_extents_t<
+                                        std::remove_reference_t<T>>>;
 
 // flat_cast_t<A>: the type of the flattened array A, preserving cvref quals
 //                 e.g. flat_cast_t<int const(&)[2][3]> -> int const(&)[6]
 //
 template <c_array_unpadded A, typename E = remove_all_extents_t<
                                            std::remove_reference_t<A>>>
-using flat_cast_t = impl::copy_ref<A, E[flat_size<A>]>;
+using flat_cast_t = apply_ref<A, E[flat_size<A>]>;
 
-// same_extents<A,B>: trait to tell if A and B have the same extents;
-// array types with the same extents or both rank 0 (non-array) types
+// flat_cast(a): cast to flat_cast_t, a reinterpret_cast for an ND array.
+//               Returns a, the identity, for 1D array so can be constexpr.
 //
-template <typename A, typename B>
-inline constexpr bool same_extents =
-      (std::rank_v<A> == 0 && std::rank_v<B> == 0)
-   || (std::extent_v<A> == std::extent_v<B>
-    && same_extents<remove_extent_t<A>,remove_extent_t<B>>);
+// Note: prefer flat_index(a,i) over flat_cast(a)[i] to avoid reinterpet_cast
+//
+template <c_array_unpadded A>
+constexpr auto&& flat_cast(A&& a) noexcept {
+  if constexpr (rank_v<std::remove_cvref_t<A>> == 1)
+    return (A&&)a;
+  else
+    return reinterpret_cast<flat_cast_t<A&&>>(a);
+}
 
 // subscript(a,i):
 // returns a[i], an rvalue if argument 'a' is an array rvalue
 //  workaround for MSVC https://developercommunity.visualstudio.com/t/
 //  subscript-expression-with-an-rvalue-array-is-an-xv/1317259
 //
-constexpr auto&& subscript(c_array auto&& a, std::size_t i = 0) noexcept
+template <c_array A>
+constexpr auto subscript(A&& a, std::size_t i = 0) noexcept
+           -> extent_removed_t<A&&>
 {
   if constexpr (std::is_lvalue_reference_v<decltype(a)>)
     return a[i];
   else {
-    auto move = []<typename T>(T&&v)noexcept->std::remove_cvref_t<T>&&
-                   {return static_cast<std::remove_cvref_t<T>&&>(v);};
-    return move(a[i]);
+    using R = extent_removed_t<A&&>;
+    return [](R&v)noexcept->R {return R(v);}(a[i]); // move(a[i]) equivalent
   }
 }
 
@@ -240,14 +268,14 @@ constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0) noexcept
 // requires C array a, returns the element at index i of the flattened array.
 // Non-constant evaluation uses reinterpret_cast for hopefully better codegen.
 //
-constexpr auto&& flat_index(c_array auto&& a, std::size_t i = 0) noexcept
+template <c_array A>
+constexpr auto flat_index(A&& a, std::size_t i = 0) noexcept
+           -> all_extents_removed_t<A&&> 
 {
-  using A = decltype(a);
-  using E = all_extents_removed_t<A>;
   if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
-      return static_cast<E>(flat_index_recurse(a,i));
+    return static_cast<all_extents_removed_t<A&&>>(flat_index_recurse(a,i));
   else
-      return subscript(reinterpret_cast<flat_cast_t<A>>(a),i);
+    return subscript(flat_cast<A&&>(a),i); // reinterpret_cast for > 1D array
 }
 
 // flat_index(a) -> a;

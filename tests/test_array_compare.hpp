@@ -6,6 +6,11 @@
 #define EXCLUDE_MSVC(...) __VA_ARGS__
 #endif
 
+using ltl::impl::pointer_equality_comparable_with;
+
+static_assert( ltl::compare_three_way{}("hello","world") < 0 );
+//static_assert( std::compare_three_way{}("hello","world") < 0 );
+
 constexpr int a01_23[2][2] {{0,1},{2,3}};
 constexpr int a01_22[2][2] {{0,1},{2,2}};
 static_assert( ltl::compare_three_way{}(a01_23, a01_22) > 0 );
@@ -22,7 +27,7 @@ inline constexpr L2 b{0,1};
 
 static_assert( std::equality_comparable_with<int*,int*> );
 static_assert( ltl::equality_comparable_with<int*,int*> );
-static_assert( ltl::pointer_equality_comparable_with<int*,int*> );
+static_assert( pointer_equality_comparable_with<int*,int*> );
 
 static_assert( std::equality_comparable<int[2]> ); // id equality
 static_assert( ltl::equality_comparable<int[2]> ); // array equality
@@ -30,7 +35,7 @@ static_assert( ltl::equality_comparable<int[2]> ); // array equality
 static_assert( std::equality_comparable_with<int[2],int[4]> );
 static_assert( ltl::equality_comparable_with<int[2],int[2]> );
 static_assert( ! ltl::equality_comparable_with<int[2],int[4]> );
-static_assert( ! ltl::pointer_equality_comparable_with<int[2],int[4]> );
+static_assert( ! pointer_equality_comparable_with<int[2],int[4]> );
 
 static_assert( ltl::same_extents<I2,L2> );
 
@@ -97,13 +102,13 @@ static_assert( ltl::equal_to{}(I2{0,1},L2{0,1}) );
 
 static_assert(   ltl::member_default_3way<int> );
 static_assert(   ltl::member_default_3way<int[2]>
-              || ltl::GCC10_ARRAY_COMPARE_WORKAROUND);
+              || ltl::impl::GCC10_ARRAY_COMPARE_WORKAROUND);
 static_assert(   ltl::member_default_3way<int*> );
 static_assert( ! ltl::member_default_3way<int&> );
 
 static_assert(   ltl::member_default_equality<int> );
 static_assert(   ltl::member_default_equality<int[2]>
-              || ltl::GCC10_ARRAY_COMPARE_WORKAROUND);
+              || ltl::impl::GCC10_ARRAY_COMPARE_WORKAROUND);
 static_assert(   ltl::member_default_equality<int*> );
 static_assert( ! ltl::member_default_equality<int&> );
 

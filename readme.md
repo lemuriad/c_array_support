@@ -1,6 +1,6 @@
 # **`c_array_support`**
 
-## C++20 Concepts, traits and utils for handing C arrays
+## C++20 Concepts, traits and tools for handing C arrays
 
 <details><summary>Copyright &copy; 2021 Will Wray. Distributed under the Boost Software License, V1.0</summary>
 
@@ -38,11 +38,30 @@ Also at [boost.org](http://www.boost.org/LICENSE_1_0.txt) and accompanying file 
 
 ------------
 
-### `c_array_support.hpp`, `array_compare.hpp`, `array_assign.hpp`
+These headers provide:
 
-github actions meson build:  
-linux gcc 11, linux clang 12, macos gcc 11, windows latest MSVC (19.29)  
-[![example workflow](https://github.com/willwray/c_array_support/actions/workflows/ci.yml/badge.svg)](https://github.com/willwray/c_array_support/actions) 
+* Tools for dealing with possibly-nested, possibly zero-size C arrays
+* Type traits and concepts for handling C arrays alongside other types  
+in type-generic code; generic comparison and assignment operations.
+
+In short, support for treating C arrays as more regular types.
+
+```mermaid
+  graph TD;
+      c_array_support.hpp -.-> array_compare.hpp;
+      c_array_support.hpp -.-> array_assign.hpp;
+
+```
+
+Nested C arrays in particular benefit from helper functions that factor out recursions  
+(nested C arrays are not much used in C++ but generic code should support them).
+
+Zero-size arrays are outcasts; standard C and C++ languages disallow them, libraries  
+ignore them, and compilers have limited support in the form of old C extensions.
+
+Zero-size arrays _are_ arrays too!  
+Zero-size arrays _can_ be handled by compilers so generic code should support them.  
+This library is proof of feasibility that zero-size arrays can be treated as regular types.
 
 ### [Documentation](#documentation.md) page
 
@@ -50,71 +69,75 @@ linux gcc 11, linux clang 12, macos gcc 11, windows latest MSVC (19.29)
 
 ## `c_array_support.hpp`
 
-Depends on std `<type_traits>` and C++20 features. 
+Depends on std `<type_traits>` and C++20 language features. 
 
-This header provides traits and utilities for handling C arrays in generic code such  
-as in `array_compare.hpp` and `array_assign.hpp` below.
-Nested arrays benefit  
-from helper functions that factor out recursions.
+This header provides a `c_array` concept plus tools and traits for handling possibly-  
+nested C arrays as-if flat. All utilities are carefully coded to accept `T[0]` if possible,  
+including some std trait replacements fixed to work robustly with `T[0]`.
 
-(Nested C arrays are not much used in C++ but generic code should support them).
-
-Zero-size arrays: The utilities are carefully coded to accept `T[0]` where possible.  
-Standard `type_traits`   fail or give erroneous results for zero-size array, including  
-`std::is_array<int[0]>` which evaluates `false`,
-but zero-size array is an array!
-
-This header provides alternative implementations for std traits that work with `T[0]`.
-
-### Alternative versions of `std` traits, robust to `T[0]`
-
->Note: this is not a complete set of replacements
-for failing `std` traits.  
-These provided traits are the ones that proved most useful so far.
-
-* `ltl::is_array_v`
-* `ltl::is_bounded_array_v`
-* `ltl::rank_v`
-* `ltl::remove_extent_t`
-* `ltl::remove_all_extents`
-* `ltl::remove_all_extents_t`
+E.g. `ltl::is_array<int[0]>` is true  
+but `std::is_array<int[0]>` is false (on tested compilers, or fails to compile)
 
 ### Concepts
 
 * `ltl::c_array<T>`          matches C array, including reference-to-array type
-* `ltl::c_array_unpadded<T>` matches C arrays with no padding
+* `ltl::c_array_unpadded<T>` matches C arrays with no padding  
+(this 'unpadded' concept is a paranoid addition for protecting casts)
 
-### Aliases
+### Replacement `std` traits, robust to `T[0]`
+* Predicates:
+  * `ltl::is_array_v`
+  * `ltl::is_bounded_array_v`
+  * `ltl::rank_v`
+* Type aliases:
+  * `ltl::remove_extent_t`
+  * `ltl::remove_all_extents`
+  * `ltl::remove_all_extents_t`
 
-* `ltl::c_array_t<T,N...>` maps variadic `N...` to array type -> `T[N][...]`
-* `ltl::extent_removed_t<A>` remove_extent, under any reference qualification
-* `ltl::all_extents_removed_t<A>` same for remove_all_extents
-* `ltl::flat_cast_t<A>` maps array `A` to flattened array type, preserving cvref
+(This is not a complete set of replacements
+for failing `std` traits.  
+&nbsp;The provided traits are the ones that proved most useful so far.)
 
-### Traits
+### Value traits
 
 * `flat_size<A>` yields the total number of elements in flattened array `A`
 * `same_extents<A,B>` predicate to tell if `A` and `B` have the same extents
 
+### Type aliases
+
+* `c_array_t<T,N...>` maps variadic `N...` to array type -> `T[N][...]`
+* `extent_removed_t<A>` remove_extent, under any reference qualification
+* `all_extents_removed_t<A>` same for remove_all_extents
+* `flat_cast_t<A>` maps array `A` to 'flattened' 1D array type, preserving cvref
+
 ### Functions
 
-* `subscript(a,i)` returns `a[i]`, an rvalue if the argument is an array rvalue.
-* `flat_index(arg,i)`returns `a[i]`;
- the element at index `i` of the flattened array.
+* `flat_cast(a)` returns 'flattened' 1D array type, preserving cvref qualification.
+* `flat_index(ar,i)` returns the element at index `i` of the flattened array  
+`flat_index(arg)` returns  the first 'begin' element of the flattened array  
+ (also a reference to 'end' for zero-size) returns `arg` directly if it is not an array.
+* `subscript(a,i)` returns `a[i]`, an rvalue if the argument is an array rvalue,  
+`subscript(a)` returns `a[0]`, the first element.
+
+The `subscript` function is a workaround for an MSVC issue.
+
+The `c_array_support.hpp` tools are specific to C array, not type-generic tools.  
+The remaining two headers add generic support for comparison and assignment.
 
 ------------
 
 ## array_compare.hpp
 
-Depends on std `<compare>` for three-way operator <=> support.
+Depends on std `<compare>` and `c_array_support.hpp`
+
+This header provides replacements for `std` library facilities
+for generic comparison.
 
 ### Concepts
 
 * `ltl::three_way_comparable` [`_with`] (c.f. std)
 * `ltl::equality_comparable`  [`_with`] (c.f. std)
 * `ltl::totally_ordered`      [`_with`] (c.f. std)
-* `ltl::pointer_equality_comparable_with`  (no std equivalent)
-* `ltl::pointer_less_than_comparable_with` (no std equivalent)
 
 ### Aliases
 
@@ -127,11 +150,15 @@ Depends on std `<compare>` for three-way operator <=> support.
 * `ltl::not_equal_to`          (c.f. std)
 * `ltl::less`                  (c.f. std)
 
+(This is not a complete set of replacement 
+comparison functors  
+&nbsp;as `compare_three_way` can cover the remaining cases.)
+
 ------------
 
 ## array_assign.hpp
 
-Depends on std `<concepts>`
+Depends on std `<concepts>` and `c_array_support.hpp`
 
 ### Concepts
 
@@ -142,10 +169,6 @@ Depends on std `<concepts>`
 
 * `ltl::assign` (no std equivalent)
 
-
-Zero-size arrays are disallowed in standard C and C++ (except in  array `new T[0]`).  
-Compilers support a C extension that admits zero-size array as the final member of  
-a struct (C99 standardized use of `T[]` for this purpose; FAM flexible array member).
-
-The worry is that adjacent same-type zero-size array objects would not be iterable.  
-C++20 `[[no_unique_address]]` attribute deals with this issue for empty classes.
+-----
+[![example workflow](https://github.com/willwray/c_array_support/actions/workflows/ci.yml/badge.svg)](https://github.com/willwray/c_array_support/actions)  
+linux gcc 11, linux clang 12, macos gcc 11, windows c++latest MSVC v19.29
