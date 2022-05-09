@@ -122,7 +122,7 @@ auto locals = [] {
   int loci0[0];
 #include "ALLOW_ZERO_SIZE_ARRAY.hpp"
   int0 locj0;
-  assert( &loci0 == &locj0);
+//  assert( &loci0 == &locj0);
 #endif
 };
 
