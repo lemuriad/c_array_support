@@ -256,9 +256,10 @@ constexpr auto subscript(A&& a, std::size_t i = 0) noexcept
 //
 constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0) noexcept
 {
-  if constexpr (c_array<decltype(a[i])>)
+  using E = decltype(a[0]);
+  if constexpr (c_array<E>)
   {
-    constexpr auto M = flat_size<decltype(a[i])>;
+    constexpr auto M = flat_size<E>;
     return flat_index_recurse(a[i/M], i%M);
   }
   else return a[i];
@@ -266,16 +267,16 @@ constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0) noexcept
 
 // flat_index(a,i)
 // requires C array a, returns the element at index i of the flattened array.
-// Non-constant evaluation uses reinterpret_cast for hopefully better codegen.
+// Non-constant evaluation avoids codegen of recursive div/mod arithmetic.
 //
 template <c_array A>
 constexpr auto flat_index(A&& a, std::size_t i = 0) noexcept
-           -> all_extents_removed_t<A&&> 
+           -> all_extents_removed_t<A&>
 {
   if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
-    return static_cast<all_extents_removed_t<A&&>>(flat_index_recurse(a,i));
+    return flat_index_recurse(a,i);
   else
-    return subscript(flat_cast<A&&>(a),i); // reinterpret_cast for > 1D array
+    return flat_cast<A&>(a)[i];
 }
 
 // flat_index(a) -> a;

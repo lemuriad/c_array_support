@@ -91,7 +91,6 @@ static_assert(sizeof(int[0]) == 0);
 //
 extern int0 e;
 int0 s; // is this a definition, or just a declaration -> unresolved external
-bool se_same_address() { return &s == &e; }
 
 // T x[0];
 // GCC and Clang may warn on global or local declarations
@@ -172,7 +171,6 @@ static_assert( sizeof closure(size_t0{}) == sizeof(size_t) );
 
 int main()
 {
-  //assert(se_same_address());
   locals();
   assert( &zr == &zc );
 }

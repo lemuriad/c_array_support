@@ -194,10 +194,8 @@ static_assert( ltl::flat_index(int2{1,2},1) == 2 );
 static_assert( ltl::flat_index(cint2) == 1 );
 static_assert( ltl::flat_index(cint2,1) == 2 );
 
-static_assert( std::is_same_v< decltype(ltl::flat_index(int2{})),
-                               int&&> );
-static_assert( std::is_same_v< decltype(ltl::flat_index(cint2)),
-                               int const&> );
+static_assert( std::is_same_v< decltype(ltl::flat_index(eint2)),
+                               int&> );
 static_assert( std::is_same_v< decltype(ltl::flat_index(cint2)),
                                int const&> );
 
@@ -210,15 +208,6 @@ static_assert( ltl::flat_index(int23{{1,2,3},{4,5,6}},3) == 4 );
 static_assert( ltl::flat_index(cint23) == 1 );
 static_assert( ltl::flat_index(cint23,4) == 5 );
 
-static_assert( ltl::flat_index(int2{1,2},1) == 2 );
-static_assert( ltl::flat_index(cint2,1) == 2 );
-
-static_assert( std::is_same_v< decltype(ltl::flat_index(int2{})),
-                               int&&> );
-static_assert( std::is_same_v< decltype(ltl::flat_index(cint2)),
-                               int const&> );
-static_assert( std::is_same_v< decltype(ltl::flat_index(cint2)),
-                               int const&> );
 
 inline constexpr int cint4213[4][2][1][3]
 {  { {{0,1,2}},{{3,4,5}} },

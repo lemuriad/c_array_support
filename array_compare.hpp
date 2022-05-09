@@ -14,7 +14,7 @@
   Replacements for C++20 std library facilities for generic comparison
   extended to support C arrays. Only same-size, same shape, arrays are
   considered comparable. Multidimensional arrays are compared as-if flat.
-  
+
   Depends on <compare> and c_array_support.hpp
 
   Avoids <algorithm> or <functional> dependency by implementing algorithms
