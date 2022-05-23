@@ -29,6 +29,19 @@ static_assert( ltl::c_array<int0&> );
 static_assert( ltl::c_array<X0> );
 static_assert( ltl::c_array<X0 const&&> );
 
+static_assert( ltl::c_array<int0,int> );
+static_assert( ltl::c_array<int0&,int> );
+static_assert( ltl::c_array<X0,X> );
+static_assert( ltl::c_array<X0 const&&,X> );
+
+static_assert( ! ltl::c_array<int0,int const> );
+static_assert( ! ltl::c_array<int0&,int&> );
+static_assert( ! ltl::c_array<X0,X volatile> );
+static_assert( ! ltl::c_array<X0 const&&,X const> );
+
+ltl::c_array auto& hi = "hi";
+ltl::c_array<char> auto& ho = hi;
+
 static_assert( ltl::c_array<int[2]> );
 static_assert( ltl::c_array<int(&)[2]> );
 static_assert( ltl::c_array<int const(&&)[2]> );

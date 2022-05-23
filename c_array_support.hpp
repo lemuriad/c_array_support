@@ -101,12 +101,6 @@ template <typename A>
 inline constexpr bool is_bounded_array_v = is_array_v<A>
           && ! std::is_unbounded_array_v<A>;
 
-// c_array concept: matches C array, including references to C array,
-// including zero-size array, but not including unbounded array type
-//
-template <typename A>
-concept c_array = is_bounded_array_v<std::remove_cvref_t<A>>;
-
 // remove_extent_t<A>
 namespace impl {
 template <typename A> requires (! is_array_v<A>)
@@ -146,6 +140,16 @@ inline constexpr auto rank_v = [] {
          return 1 + rank_v<remove_extent_t<A>>; // recurse
     else return 0;
 }();
+
+// c_array concept: matches C array, including references to C array,
+// including zero-size array, but not including unbounded array type.
+// The second parameter allows to constrain or test the element type,
+// cv unqualified: c_array<char> auto& a = "a"; matches const char
+//
+template <typename A, typename E = remove_extent_t<std::remove_cvref_t<A>>>
+concept c_array = is_bounded_array_v<std::remove_cvref_t<A>>
+                        && requires (std::remove_cvref_t<A> p)
+                         { requires std::is_same_v<E*,decltype(p)>; };
 
 // flat_size<A>: total number of elements in A
 // computed by recursion; the product of extents of all ranks of A
