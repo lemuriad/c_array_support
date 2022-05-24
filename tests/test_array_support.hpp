@@ -39,8 +39,8 @@ static_assert( ! ltl::c_array<int0&,int&> );
 static_assert( ! ltl::c_array<X0,X volatile> );
 static_assert( ! ltl::c_array<X0 const&&,X const> );
 
-ltl::c_array auto& hi = "hi";
-ltl::c_array<char> auto& ho = hi;
+//ltl::c_array auto& hi = "hi"; // fails on gcc10
+ltl::c_array<char> auto& ho = "hi";
 
 static_assert( ltl::c_array<int[2]> );
 static_assert( ltl::c_array<int(&)[2]> );
