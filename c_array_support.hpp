@@ -10,10 +10,10 @@
 /*
   c_array_support.hpp
   ===================
- 
+
   c_array concept, type traits and utilities for handing C arrays.
 
-  Depends on std <type_traits> and uses C++20 features. 
+  Depends on std <type_traits> and uses C++20 features.
 
   C arrays are hard to handle, multidimensional arrays especially.
   Generic code ought to handle arrays but they're often neglected.
