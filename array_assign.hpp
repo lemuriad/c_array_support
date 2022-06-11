@@ -46,7 +46,7 @@
  =====
 
    int a[2], b[2];
-   ltl::assign(a) = {1,2}; // A reference-wrapper fpr assignment
+   ltl::assign(a) = {1,2}; // A reference-wrapper for assignment
    ltl::assign(b,{3,4});
    ltl::assign_to{a} = b;
    ltl::assign(a) = {};
@@ -57,7 +57,7 @@
    template <typename L, typename R>
      requires ltl::assignable_from<L&,R&&>
    L& ass(L& l, R&& r) { return ltl::assign(l,(R&&)r); }
-  
+
   See the ltl::tupl implementation for its use in array member support.
 
  Raison d'etre
@@ -91,8 +91,10 @@ concept default_assignable =
 
 template <typename L, typename R>
 concept assignable_from =
-   std::assignable_from< all_extents_removed_t<L>, all_extents_removed_t<R> >
-&& same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+   std::assignable_from< all_extents_removed_t<L>,
+                         all_extents_removed_t<R> >
+   && same_extents<std::remove_cvref_t<L>,
+                   std::remove_cvref_t<R>>;
 
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
@@ -129,7 +131,6 @@ struct assign_to<L>
   //
   template <c_array R>
     requires assignable_from<L, R&&>
-          && same_extents<value_type, std::remove_cvref_t<R>>
   constexpr L& operator=(R&& r) const
       noexcept(noexcept(flat_index(l) = flat_index((R&&)r)))
   {
@@ -140,9 +141,7 @@ struct assign_to<L>
 
   // operator=(rval) overload for array rvalue from braced-init
   //
-  template <int N>
-    requires (N == std::extent_v<value_type>)
-  constexpr L& operator=(remove_extent_t const(&r)[N]) const
+  constexpr L& operator=(value_type const& r) const
       noexcept(noexcept(flat_index(l) = flat_index(r)))
   {
       return operator=<value_type const&>(r);
@@ -152,7 +151,8 @@ struct assign_to<L>
 
 // assign(l) returns assign_to{l}, if assign_toable, else reference-to-l
 template <typename L>
-decltype(auto) assign(L&& l) {
+decltype(auto) assign(L&& l) noexcept
+{
     if constexpr (assign_toable<L&&>)
         return std::type_identity_t<assign_to<L&&> const>{l};
     else
@@ -160,28 +160,26 @@ decltype(auto) assign(L&& l) {
 }
 
 template <typename L, typename R>
-decltype(auto) assign(L&& l, R&& r) {
+  requires (std::assignable_from<L&,R&&> || assign_toable<L&&>)
+decltype(auto) assign(L&& l, R&& r)
+  noexcept(noexcept(assign(l)=(R&&)r))
+{
     if constexpr (assign_toable<L&&>)
         return std::type_identity_t<assign_to<L&&> const>{l} = (R&&)r;
-    else {
-        static_assert(std::assignable_from<L&,R&&>);
+    else
         return l = (R&&)r;
-    }
 }
 
 template <typename L>
-decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r) {
+decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
+  noexcept(noexcept(assign(l)=r))
+{
     if constexpr (assign_toable<L&&>)
         return std::type_identity_t<assign_to<L&&> const>{l} = r;
     else {
         static_assert(std::assignable_from<L&,L const&>);
         return l = r;
     }
-}
-
-template <typename E, int N>
-decltype(auto) assign(E(&l)[N], E const(&r)[N]) {
-    return std::type_identity_t<assign_to<E(&)[N]> const>{l} = r;
 }
 
 #include "namespace.hpp"
