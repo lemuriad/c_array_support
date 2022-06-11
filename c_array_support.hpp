@@ -42,18 +42,18 @@
   - c_array_unpadded<A>: matches unpadded C array, including references
 
  Value traits:
-  - flat_size<A>: yields the total number of elements in flattened array A
-  - same_extents<A,B>: predicate to tell if A and B have the same extents
+  - flat_size<A>: the total number of elements in flattened array A
+  - same_extents<A,B>: predicate tells if A and B have the same extents
 
  Aliases:
   - c_array_t<T,I...>: template alias to C array type T[I][...]
   - extent_removed_t<A>: remove_extent, under any reference qualifier
-  - all_extents_removed_t<T>: remove_all_extents, under any reference qual
-  - flat_cast_t<A>: The type of the flattened array A, preserving cvref quals
+  - all_extents_removed_t<T>: remove_all_extents, under any ref qual
+  - flat_cast_t<A>: type of the flattened array A preserving cvref quals
 
  Functions:
-  - flat_cast(a)  returns 'flattened' 1D array type, preserving cvref quals.
-  - subscript(a,i):    returns a[i], an rvalue if 'a' is an rvalue
+  - flat_cast(a) returns flattened 1D array, preserving cvref quals
+  - subscript(a,i): returns a[i], an rvalue if 'a' is an rvalue
   - flat_index(a,i=0): returns element at i in flat_cast(a)
 */
 
@@ -91,7 +91,7 @@ using c_array_t = impl::c_array_t<T,I...>;
 template <typename A>
 inline constexpr bool is_array_v = requires {
   requires std::is_object_v<A>;
-  requires requires (A p) { requires ! std::is_same_v<A, decltype(p)>; };
+  requires requires (A p) {requires ! std::is_same_v<A, decltype(p)>;};
 };
 
 // is_bounded_array_v<A>
@@ -146,7 +146,8 @@ inline constexpr auto rank_v = [] {
 // The second parameter allows to constrain or test the element type,
 // cv unqualified: c_array<char> auto& a = "a"; matches const char
 //
-template <typename A, typename E = remove_extent_t<std::remove_cvref_t<A>>>
+template <typename A,
+          typename E = remove_extent_t<std::remove_cvref_t<A>>>
 concept c_array = is_bounded_array_v<std::remove_cvref_t<A>>
                         && requires (std::remove_cvref_t<A> p)
                          { requires std::is_same_v<E*,decltype(p)>; };
@@ -183,28 +184,25 @@ template <typename A>
 concept c_array_unpadded = c_array<A>
     && flat_size<A> * sizeof(remove_all_extents_t<
                              std::remove_cvref_t<A>>) == sizeof(A);
+
+// apply_ref and copy_ref utilities, don't belong in c_array_support;
+// might move them to a traits lib
+//
 namespace impl {
 template <typename L, typename R> extern R apply_ref;
 template <typename L, typename R> extern R& apply_ref<L&,R>;
 template <typename L, typename R> extern R&& apply_ref<L&&,R>;
-
-template <typename L, typename R>
-extern std::remove_reference_t<R> cp_ref;
-template <typename L, typename R>
-extern std::remove_reference_t<R>& cp_ref<L&,R>;
-template <typename L, typename R>
-extern std::remove_reference_t<R>&& cp_ref<L&&,R>;
 } // impl
-//
-// copy_ref<L,R> imposes any reference qualifier on L to R
-//
-template <typename L, typename R>
-using copy_ref = decltype(impl::cp_ref<L,R>);
 //
 // apply_ref<L,R> applies any reference qualifier on L to R
 //             => reference collapse if R is already a reference
 template <typename L, typename R>
 using apply_ref = decltype(impl::apply_ref<L,R>);
+//
+// copy_ref<L,R> imposes any reference qualifier on L to R
+//
+template <typename L, typename R>
+using copy_ref = decltype(impl::apply_ref<L,std::remove_reference_t<R>>);
 
 // extent_removed_t<T> remove_extent, under any reference qualifier
 //                e.g. extent_removed_t<int(&&)[1][2]> -> int(&&)[2]
@@ -212,23 +210,23 @@ template <c_array A>
 using extent_removed_t = apply_ref<A,remove_extent_t<
                                    std::remove_reference_t<A>>>;
 
-// all_extents_removed_t<T> remove_all_extents, under any reference qualifier
+// all_extents_removed_t<T> remove_all_extents, under any ref qualifier
 //                     e.g. all_extents_removed_t<int(&)[1][2]> -> int&
 template <typename T>
 using all_extents_removed_t = apply_ref<T,remove_all_extents_t<
                                         std::remove_reference_t<T>>>;
 
-// flat_cast_t<A>: the type of the flattened array A, preserving cvref quals
-//                 e.g. flat_cast_t<int const(&)[2][3]> -> int const(&)[6]
+// flat_cast_t<A> type of the flattened array A, preserving cvref quals
+//               e.g. flat_cast_t<int const(&)[2][3]> -> int const(&)[6]
 //
 template <c_array_unpadded A, typename E = remove_all_extents_t<
                                            std::remove_reference_t<A>>>
 using flat_cast_t = apply_ref<A, E[flat_size<A>]>;
 
-// flat_cast(a): cast to flat_cast_t, a reinterpret_cast for an ND array.
-//               Returns a, the identity, for 1D array so can be constexpr.
+// flat_cast(a) cast to flat_cast_t, a reinterpret_cast for an ND array.
+//            Returns a, the identity, for 1D array so can be constexpr.
 //
-// Note: prefer flat_index(a,i) over flat_cast(a)[i] to avoid reinterpet_cast
+// Prefer flat_index(a,i) over flat_cast(a)[i] to avoid reinterpet_cast.
 //
 template <c_array_unpadded A>
 constexpr auto&& flat_cast(A&& a) noexcept {
@@ -238,7 +236,7 @@ constexpr auto&& flat_cast(A&& a) noexcept {
     return reinterpret_cast<flat_cast_t<A&&>>(a);
 }
 
-// subscript(a,i):
+// subscript(a,i)
 // returns a[i], an rvalue if argument 'a' is an array rvalue
 //  workaround for MSVC https://developercommunity.visualstudio.com/t/
 //  subscript-expression-with-an-rvalue-array-is-an-xv/1317259
@@ -251,16 +249,17 @@ constexpr auto subscript(A&& a, std::size_t i = 0) noexcept
     return a[i];
   else {
     using R = extent_removed_t<A&&>;
-    return [](R&v)noexcept->R {return R(v);}(a[i]); // move(a[i]) equivalent
+    return [](R&v)noexcept->R {return R(v);}(a[i]); // move(a[i]) equiv
   }
 }
 
 // flat_index_recurse(a,i)
-// requires C array a, returns the element at index i of the flattened array.
-// A recursive implementation is constexpr-correct but may give poor runtime
-// codegen, if it isn't inlined with the div/mod arithmetic folded out.
+// Returns the element at index i of the flattened array. A recursive
+// implementation is constexpr-correct but may give poor runtime codegen
+// if it isn't inlined with the div/mod arithmetic folded out.
 //
-constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0) noexcept
+constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0)
+  noexcept
 {
   using E = decltype(a[0]);
   if constexpr (c_array<E>)
@@ -272,8 +271,8 @@ constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0) noexcept
 }
 
 // flat_index(a,i)
-// requires C array a, returns the element at index i of the flattened array.
-// Non-constant evaluation avoids codegen of recursive div/mod arithmetic.
+// Returns the element at index i of the flattened array.
+// Non-constant evaluation avoids codegen of recursive div/mod.
 //
 template <c_array A>
 constexpr auto flat_index(A&& a, std::size_t i = 0) noexcept
