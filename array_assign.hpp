@@ -26,12 +26,17 @@
 
    ltl::assignable_from         c.f. std::assignable_from
    ltl::default_assignable      see below (no std equivalent)
+   ltl::const_assignable        see below (no std equivalent)
    ltl::assign_toable           see below (no std equivalent)
 
-   default_assignable<T> captures language concept that a value can be
-   assigned from an empty braced initializer list; v = {}
+   default_assignable<T> captures the language concept that a value can
+   be assigned from an empty braced initializer list; v = {}
    as implied by default_initializable<T> && assignable_from<T&, T>,
    though class types can also model the concept with an operator=({}).
+
+ Traits:
+   ltl::is_copy_assignable_v    c.f. std::is_copy_assignable_v
+   ltl::is_move_assignable_v    c.f. std::is_move_assignable_v
 
  Class template:
    ltl::assign_to<T> customization point for users to specialize,
@@ -83,18 +88,44 @@
 
 #include "namespace.hpp"
 
-template <typename T>
-concept default_assignable =
-  requires (all_extents_removed_t<T> v) {
-    static_cast<all_extents_removed_t<T>>(v) = {};
-  };
-
+// assignable_from<L,R> version of std::assignable_from, true for arrays
+//
 template <typename L, typename R>
 concept assignable_from =
    std::assignable_from< all_extents_removed_t<L>,
                          all_extents_removed_t<R> >
    && same_extents<std::remove_cvref_t<L>,
                    std::remove_cvref_t<R>>;
+
+// is_copy_assignable_v<T> array version of std::is_copy_assignable_v
+//
+template <typename T>
+inline constexpr bool is_copy_assignable_v
+               = std::is_copy_assignable_v<all_extents_removed_t<T>>;
+
+// is_move_assignable_v<T> array version of std::is_move_assignable_v
+//
+template <typename T>
+inline constexpr bool is_move_assignable_v
+               = std::is_move_assignable_v<all_extents_removed_t<T>>;
+
+// default_assignable<T> can be assigned from an empty braced init-list
+// A new concept, defined true for array
+//
+template <typename T>
+concept default_assignable =
+  requires (all_extents_removed_t<T> v) {
+    static_cast<all_extents_removed_t<T>>(v) = {};
+  };
+
+// const_assignable<T> captures the property of references and proxies
+// that they can be assigned to even if const qualified.
+//
+template <typename T> concept const_assignable =
+      requires (all_extents_removed_t<T> const c) { c=c; };
+//
+template <typename T> using is_const_assignable =
+            std::bool_constant<const_assignable<T>>;
 
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
