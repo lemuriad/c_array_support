@@ -189,15 +189,25 @@ concept c_array_unpadded = c_array<A>
 // might move them to a traits lib
 //
 namespace impl {
-template <typename L, typename R> extern R apply_ref;
-template <typename L, typename R> extern R& apply_ref<L&,R>;
-template <typename L, typename R> extern R&& apply_ref<L&&,R>;
+template<typename R, typename T>
+auto apply_ref()
+{
+  if constexpr (std::is_reference_v<R>) {
+    if constexpr (std::is_lvalue_reference_v<R>)
+      return std::type_identity<T&>{};
+    else
+      return std::type_identity<T&&>{};
+  }
+  else
+    return std::type_identity<T>{};
+};
+
 } // impl
 //
 // apply_ref<L,R> applies any reference qualifier on L to R
 //             => reference collapse if R is already a reference
 template <typename L, typename R>
-using apply_ref = decltype(impl::apply_ref<L,R>);
+using apply_ref = typename decltype(impl::apply_ref<L,R>())::type;
 //
 // copy_ref<L,R> imposes any reference qualifier on L to R
 //
