@@ -182,7 +182,7 @@ struct assign_to<L>
 
 // assign(l) returns assign_to{l}, if assign_toable, else reference-to-l
 template <typename L>
-decltype(auto) assign(L&& l) noexcept
+constexpr decltype(auto) assign(L&& l) noexcept
 {
     if constexpr (assign_toable<L&&>)
         return std::type_identity_t<assign_to<L&&> const>{l};
@@ -192,7 +192,7 @@ decltype(auto) assign(L&& l) noexcept
 
 template <typename L, typename R>
   requires (std::assignable_from<L&,R&&> || assign_toable<L&&>)
-decltype(auto) assign(L&& l, R&& r)
+constexpr decltype(auto) assign(L&& l, R&& r)
   noexcept(noexcept(assign(l)=(R&&)r))
 {
     if constexpr (assign_toable<L&&>)
@@ -202,7 +202,7 @@ decltype(auto) assign(L&& l, R&& r)
 }
 
 template <typename L>
-decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
+constexpr decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
   noexcept(noexcept(assign(l)=r))
 {
     if constexpr (assign_toable<L&&>)
