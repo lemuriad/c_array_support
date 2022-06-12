@@ -212,7 +212,7 @@ using apply_ref = typename decltype(impl::apply_ref<L,R>())::type;
 // copy_ref<L,R> imposes any reference qualifier on L to R
 //
 template <typename L, typename R>
-using copy_ref = decltype(impl::apply_ref<L,std::remove_reference_t<R>>);
+using copy_ref = apply_ref<L,std::remove_reference_t<R>>;
 
 // extent_removed_t<T> remove_extent, under any reference qualifier
 //                e.g. extent_removed_t<int(&&)[1][2]> -> int(&&)[2]
