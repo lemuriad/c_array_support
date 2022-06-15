@@ -57,7 +57,7 @@
   - flat_index(a,i=0): returns element at i in flat_cast(a)
 */
 
-#include <type_traits>
+#include "util_traits.hpp"
 
 #include "namespace.hpp"
 
@@ -184,35 +184,6 @@ template <typename A>
 concept c_array_unpadded = c_array<A>
     && flat_size<A> * sizeof(remove_all_extents_t<
                              std::remove_cvref_t<A>>) == sizeof(A);
-
-// apply_ref and copy_ref utilities, don't belong in c_array_support;
-// might move them to a traits lib
-//
-namespace impl {
-template<typename R, typename T>
-auto apply_ref()
-{
-  if constexpr (std::is_reference_v<R>) {
-    if constexpr (std::is_lvalue_reference_v<R>)
-      return std::type_identity<T&>{};
-    else
-      return std::type_identity<T&&>{};
-  }
-  else
-    return std::type_identity<T>{};
-};
-
-} // impl
-//
-// apply_ref<L,R> applies any reference qualifier on L to R
-//             => reference collapse if R is already a reference
-template <typename L, typename R>
-using apply_ref = typename decltype(impl::apply_ref<L,R>())::type;
-//
-// copy_ref<L,R> imposes any reference qualifier on L to R
-//
-template <typename L, typename R>
-using copy_ref = apply_ref<L,std::remove_reference_t<R>>;
 
 // extent_removed_t<T> remove_extent, under any reference qualifier
 //                e.g. extent_removed_t<int(&&)[1][2]> -> int(&&)[2]
