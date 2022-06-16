@@ -28,7 +28,7 @@ auto apply_ref()
   }
   else
     return std::type_identity<R>{};
-};
+}
 
 template<typename L, typename R>
 auto apply_cv()
