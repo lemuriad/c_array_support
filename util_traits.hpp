@@ -53,28 +53,46 @@ auto apply_cv()
 // apply_ref<L,R> applies any reference qualifier on L to R
 //             => reference collapse if R is already a reference
 template <typename L, typename R>
-using apply_ref = typename decltype(impl::apply_ref<L,R>())::type;
+using apply_ref = decltype(impl::apply_ref<L,R>());
+
+template <typename L, typename R>
+using apply_ref_t = typename apply_ref<L,R>::type;
 
 // copy_ref<L,R> imposes any reference qualifier on L to R
 //
 template <typename L, typename R>
 using copy_ref = apply_ref<L, std::remove_reference_t<R>>;
 
+template <typename L, typename R>
+using copy_ref_t = typename copy_ref<L,R>::type;
+
 // apply_cv<L,R> applies any cv qualifier on L to R
 //
 template <typename L, typename R>
-using apply_cv = typename decltype(impl::apply_cv<L,R>())::type;
+using apply_cv = decltype(impl::apply_cv<L,R>());
 
-// copy_cv<L,R> imposes any cv qualifiers on L to R
+template <typename L, typename R>
+using apply_cv_t = typename apply_cv<L,R>::type;
+
+// copy_cv<L,R> imposes any cv qualifiers on L to R, removing any ref
 //
 template <typename L, typename R>
 using copy_cv = apply_cv<L, std::remove_cvref_t<R>>;
 
 template <typename L, typename R>
-using apply_cvref = apply_ref<L,apply_cv<std::remove_reference_t<L>,R>>;
+using copy_cv_t = typename copy_cv<L,R>::type;
+
+template <typename L, typename R>
+using apply_cvref = apply_ref<L,apply_cv_t<std::remove_reference_t<L>,R>>;
+
+template <typename L, typename R>
+using apply_cvref_t = typename apply_cvref<L,R>::type;
 
 template <typename L, typename R>
 using copy_cvref = apply_cvref<L,std::remove_cvref_t<R>>;
+
+template <typename L, typename R>
+using copy_cvref_t = typename copy_cvref<L,R>::type;
 
 #include "namespace.hpp"
 

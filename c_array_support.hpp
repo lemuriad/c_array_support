@@ -188,21 +188,21 @@ concept c_array_unpadded = c_array<A>
 // extent_removed_t<T> remove_extent, under any reference qualifier
 //                e.g. extent_removed_t<int(&&)[1][2]> -> int(&&)[2]
 template <c_array A>
-using extent_removed_t = apply_ref<A,remove_extent_t<
-                                   std::remove_reference_t<A>>>;
+using extent_removed_t = apply_ref_t<A,remove_extent_t<
+                                     std::remove_reference_t<A>>>;
 
 // all_extents_removed_t<T> remove_all_extents, under any ref qualifier
 //                     e.g. all_extents_removed_t<int(&)[1][2]> -> int&
 template <typename T>
-using all_extents_removed_t = apply_ref<T,remove_all_extents_t<
-                                        std::remove_reference_t<T>>>;
+using all_extents_removed_t = apply_ref_t<T,remove_all_extents_t<
+                                          std::remove_reference_t<T>>>;
 
 // flat_cast_t<A> type of the flattened array A, preserving cvref quals
 //               e.g. flat_cast_t<int const(&)[2][3]> -> int const(&)[6]
 //
 template <c_array_unpadded A, typename E = remove_all_extents_t<
                                            std::remove_reference_t<A>>>
-using flat_cast_t = apply_ref<A, E[flat_size<A>]>;
+using flat_cast_t = apply_ref_t<A, E[flat_size<A>]>;
 
 // flat_cast(a) cast to flat_cast_t, a reinterpret_cast for an ND array.
 //            Returns a, the identity, for 1D array so can be constexpr.
