@@ -74,7 +74,7 @@ template <typename L, typename R>
 using apply_cvref = apply_ref<L,apply_cv<std::remove_reference_t<L>,R>>;
 
 template <typename L, typename R>
-using copy_cvref = apply_cvref<L,std::remove_cvref<R>>;
+using copy_cvref = apply_cvref<L,std::remove_cvref_t<R>>;
 
 #include "namespace.hpp"
 
