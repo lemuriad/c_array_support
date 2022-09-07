@@ -26,7 +26,6 @@
 
    ltl::assignable_from         c.f. std::assignable_from
    ltl::default_assignable      see below (no std equivalent)
-   ltl::const_assignable        see below (no std equivalent)
    ltl::assign_toable           see below (no std equivalent)
 
    default_assignable<T> captures the language concept that a value can
@@ -110,22 +109,13 @@ inline constexpr bool is_move_assignable_v
                = std::is_move_assignable_v<all_extents_removed_t<T>>;
 
 // default_assignable<T> can be assigned from an empty braced init-list
-// A new concept, defined true for array
+// Defined true for array of default_assignable element type.
 //
 template <typename T>
 concept default_assignable =
   requires (all_extents_removed_t<T> v) {
     static_cast<all_extents_removed_t<T>>(v) = {};
   };
-
-// const_assignable<T> captures the property of references and proxies
-// that they can be assigned to even if const qualified.
-//
-template <typename T> concept const_assignable =
-      requires (all_extents_removed_t<T> const c) { c=c; };
-//
-template <typename T> using is_const_assignable =
-            std::bool_constant<const_assignable<T>>;
 
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
