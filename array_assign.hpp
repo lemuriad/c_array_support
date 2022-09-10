@@ -11,74 +11,68 @@
   array_assign.hpp
   ================
 
-  Concepts, class template and function for making assignment generic,
-  primarily to facilitate C array assignment (until such a time that C++
-  language rules are relaxed to allow more array copy semantics; P1997).
 
-  Avoids <algorithm> or <functional> dependency; implements algorithms
-  equivalent to std::ranges::copy, for possibly nested arrays (currently
-  lacks optimizations such as memcpy specializations).
+  Function assign(a,b) provides a uniform way to assign to unknown types
+  in generic code, working for arrays as well as assignable types.
 
-  Generic assignment can also be used to define extensible assignment
-  outside of class scope (as operator= has to be a member function).
+  It's a 'polyfill' until C++ adds array copy semantics to the language
+  as proposed in C++ wg21.link:/P1997 "Relaxing restrictions on array".
+  It automatically detects such language support and switches to use it.
 
- Concepts:
+  It requires C++20 and depends on <concepts> and "c_array_support.hpp".
 
-   ltl::assignable_from         c.f. std::assignable_from
-   ltl::default_assignable      see below (no std equivalent)
-   ltl::assign_toable           see below (no std equivalent)
+  Problem
+  =======
+  Assignment of C arrays is ill-formed today, e.g. given  int a[2]{};
 
-   default_assignable<T> captures the language concept that a value can
-   be assigned from an empty braced initializer list; v = {}
-   as implied by default_initializable<T> && assignable_from<T&, T>,
-   though class types can also model the concept with an operator=({}).
+    int b[2] = a; // error: array must be initialized with a braced init
+    a = b;        // error: array type 'int [2]' is not assignable
+    a = {1,2};    // error: assigning to an array from an init-list
 
- Traits:
-   ltl::is_copy_assignable_v    c.f. std::is_copy_assignable_v
-   ltl::is_move_assignable_v    c.f. std::is_move_assignable_v
+  Sadly, array copy initialization is out of reach of library solution
+  (despite special cases: auto c=[a]{}; auto [a0,a1]=a; char s[]{"s"};).
+  Array by-value argument and return type is also out of library scope.
 
- Class template:
-   ltl::assign_to<T> customization point for users to specialize,
-                     with operator=(R) overloads
- Function:
-   ltl::assign(l,r) assign r to l
-                (r may be a braced init list, empty for default-init)
+  Array assignment, on the other hand, is straightforward to implement
+  but operator= can't be overloaded for array so can't be used directly.
 
-   ltl::assign(l) return assign_to<L> if extant else return l reference
+  Usage
+  =====
+    ltl::assign(a,b)     or  ltl::assign(a) = b
+    ltl::assign(a,{1,2}) or  ltl::assign(a) = {1,2}
+    ltl::assign(a,{})    or  ltl::assign(a) = {}   // e={} forall e in a
 
- Usage
- =====
+  An lvalue reference to a is returned, as for a=b. To constrain assign
+  usage, use polyfill versions of std assignability traits and concepts:
 
-   int a[2], b[2];
-   ltl::assign(a) = {1,2}; // A reference-wrapper for assignment
-   ltl::assign(b,{3,4});
-   ltl::assign_to{a} = b;
-   ltl::assign(a) = {};
+   ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<E>
+   ltl::is_move_assignable_v<T> = std::is_move_assignable_v<E>
+   ltl::assignable_from<L,R> = std::assignable_from<EL,ER>
+                               (&& L and R have the same extents)
 
-   template <ltl::default_assignable...T>
-   void clear(T&&...v) { (ltl::assign((T&&)v,{}), ...); }
+  They check element type E = ltl::all_extents_removed<T> instead of T.
+  A new concept is introduced to capture assignment from empty braces:
 
-   template <typename L, typename R>
-     requires ltl::assignable_from<L&,R&&>
-   L& ass(L& l, R&& r) { return ltl::assign(l,(R&&)r); }
+   ltl::default_assignable<T> true if E v{}; v={}; is well formed
+                              similar to (std::default_initializable<E>
+                                          && std::assignable_from<E&,E>)
+  assign_to
+  =========
+  The actual array-array assignment is done by an 'assign_to' reference-
+  wrapper 'proxy', specialized here only for assign_to<c_array>.
 
-  See the ltl::tupl implementation for its use in array member support.
+   ltl::assign_to{a} = b; // calls assign_to<int[2]>::operator=(b)
+   ltl::assign_to<T> Customize by specializing with operator= overloads,
+                     & define a value_type alias for detection purposes.
+   ltl::assign_toable<T> true if T has typename assign_to<T>::value_type
 
- Raison d'etre
- =============
-  This header is a 'polyfill' for lack of generic assignment support,
-  in the language or standard library.
-
-  C array doesn't have copy semantics; in particular assignment:
-
-      int a[2];
-      int b[2]{};
-      a = b;    // error: array type 'int [2]' is not assignable
-      a = {};   // error: assigning to an array from an initializer list
-      a = {1,2}; // ""
-
-   P1997 fixes this. In the meantime, C++20 doesn't have std facilities
-   for generic assignment, as it has for comparisons.
+   ltl::assign(l) returns assign_to<L>, if extant, else a reference to l
+   ltl::assign(l,r) delegates to assign_to<L> if it is specialized for L
+                    else for assignable types just does assignment l = r
+  Performance
+  ===========
+  Copy optimizations such as memcpy specializations are not done, yet.
+  Nested array copies have constexpr and runtime implementations.
 */
 
 #include <concepts>
@@ -87,7 +81,7 @@
 
 #include "namespace.hpp"
 
-// assignable_from<L,R> version of std::assignable_from, true for arrays
+// assignable_from<L,R> array-enabled version of std::assignable_from
 //
 template <typename L, typename R>
 concept assignable_from =
