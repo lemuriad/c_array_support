@@ -11,7 +11,6 @@
   array_assign.hpp
   ================
 
-
   Function assign(a,b) provides a uniform way to assign to unknown types
   in generic code, working for arrays as well as assignable types.
 
@@ -30,8 +29,8 @@
     a = {1,2};    // error: assigning to an array from an init-list
 
   Sadly, array copy initialization is out of reach of library solution
-  (despite special cases: auto c=[a]{}; auto [a0,a1]=a; char s[]{"s"};).
-  Array by-value argument and return type is also out of library scope.
+  (despite special cases: auto c=[a]{}; auto [a0,a1]=a; char s[]{"s"};),
+  as is array by-value function argument and return type.
 
   Array assignment, on the other hand, is straightforward to implement
   but operator= can't be overloaded for array so can't be used directly.
@@ -85,8 +84,8 @@
 //
 template <typename L, typename R>
 concept assignable_from =
-   std::assignable_from< all_extents_removed_t<L>,
-                         all_extents_removed_t<R> >
+   std::assignable_from<all_extents_removed_t<L>,
+                        all_extents_removed_t<R>>
    && same_extents<std::remove_cvref_t<L>,
                    std::remove_cvref_t<R>>;
 
@@ -96,11 +95,17 @@ template <typename T>
 inline constexpr bool is_copy_assignable_v
                = std::is_copy_assignable_v<all_extents_removed_t<T>>;
 
+template <typename T> using is_copy_assignable
+       = std::bool_constant<is_copy_assignable_v<T>>;
+
 // is_move_assignable_v<T> array version of std::is_move_assignable_v
 //
 template <typename T>
 inline constexpr bool is_move_assignable_v
                = std::is_move_assignable_v<all_extents_removed_t<T>>;
+
+template <typename T> using is_move_assignable
+       = std::bool_constant<is_move_assignable_v<T>>;
 
 // default_assignable<T> can be assigned from an empty braced init-list
 // Defined true for array of default_assignable element type.
@@ -114,7 +119,7 @@ concept default_assignable =
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
 //
-template <typename L> struct assign_to {};
+template <typename L> struct assign_to;
 template <typename L> assign_to(L&&) -> assign_to<L&&>;
 
 template <typename L> concept assign_toable =
@@ -129,11 +134,10 @@ struct assign_to<L>
   L& l;
 
   using value_type = std::remove_reference_t<L>;
-  using remove_extent_t = std::remove_extent_t<value_type>;
 
   // operator=({}) overload for emtpy braced-init
   //
-  constexpr L& operator=(assign_to<void>) const
+  constexpr L& operator=(std::true_type) const
       noexcept(noexcept(flat_index(l) = {}))
     requires default_assignable<L&>
   {
@@ -169,7 +173,7 @@ template <typename L>
 constexpr decltype(auto) assign(L&& l) noexcept
 {
     if constexpr (assign_toable<L&&>)
-        return std::type_identity_t<assign_to<L&&> const>{l};
+        return std::add_const_t<assign_to<L&&>>{l};
     else
         return (L&&)l;
 }
@@ -180,7 +184,7 @@ constexpr decltype(auto) assign(L&& l, R&& r)
   noexcept(noexcept(assign(l)=(R&&)r))
 {
     if constexpr (assign_toable<L&&>)
-        return std::type_identity_t<assign_to<L&&> const>{l} = (R&&)r;
+        return std::add_const_t<assign_to<L&&>>{l} = (R&&)r;
     else
         return l = (R&&)r;
 }
@@ -190,7 +194,7 @@ constexpr decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
   noexcept(noexcept(assign(l)=r))
 {
     if constexpr (assign_toable<L&&>)
-        return std::type_identity_t<assign_to<L&&> const>{l} = r;
+        return std::add_const_t<assign_to<L&&>>{l} = r;
     else {
         static_assert(std::assignable_from<L&,L const&>);
         return l = r;
