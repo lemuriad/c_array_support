@@ -57,13 +57,16 @@
                                           && std::assignable_from<E&,E>)
   assign_to
   =========
-  The actual array-array assignment is done by an 'assign_to' reference-
-  wrapper 'proxy', specialized here only for assign_to<c_array>.
+  Array assign is done by reference-wrapper class assign_to<c_array>:
 
    ltl::assign_to{a} = b; // calls assign_to<int[2]>::operator=(b)
    ltl::assign_to<T> Customize by specializing with operator= overloads,
                      & define a value_type alias for detection purposes.
    ltl::assign_toable<T> true if T has typename assign_to<T>::value_type
+
+  User specialization of assign_to is not recommended. It's specialized
+  here only for C arrays, and only if they're not copyable in language.
+  Don't use assign_to directly, use it via an indirect dispatcher:
 
    ltl::assign(l) returns assign_to<L>, if extant, else a reference to l
    ltl::assign(l,r) delegates to assign_to<L> if it is specialized for L
@@ -80,20 +83,26 @@
 
 #include "namespace.hpp"
 
+// Detect language support for array copy semantics as proposed in P1997
+//
+inline constexpr bool is_copyable_array = std::copyable<int[1]>;
+
 // assignable_from<L,R> array-enabled version of std::assignable_from
 //
 template <typename L, typename R>
-concept assignable_from =
-   std::assignable_from<all_extents_removed_t<L>,
+concept assignable_from = (is_copyable_array
+ ? std::assignable_from<L,R>
+ : std::assignable_from<all_extents_removed_t<L>,
                         all_extents_removed_t<R>>
    && same_extents<std::remove_cvref_t<L>,
-                   std::remove_cvref_t<R>>;
+                   std::remove_cvref_t<R>>);
 
 // is_copy_assignable_v<T> array version of std::is_copy_assignable_v
 //
 template <typename T>
-inline constexpr bool is_copy_assignable_v
-               = std::is_copy_assignable_v<all_extents_removed_t<T>>;
+inline constexpr bool is_copy_assignable_v = (is_copyable_array
+               ? std::is_copy_assignable_v<T>
+               : std::is_copy_assignable_v<all_extents_removed_t<T>>);
 
 template <typename T> using is_copy_assignable
        = std::bool_constant<is_copy_assignable_v<T>>;
@@ -101,8 +110,9 @@ template <typename T> using is_copy_assignable
 // is_move_assignable_v<T> array version of std::is_move_assignable_v
 //
 template <typename T>
-inline constexpr bool is_move_assignable_v
-               = std::is_move_assignable_v<all_extents_removed_t<T>>;
+inline constexpr bool is_move_assignable_v = (is_copyable_array
+               ? std::is_move_assignable_v<T>
+               : std::is_move_assignable_v<all_extents_removed_t<T>>);
 
 template <typename T> using is_move_assignable
        = std::bool_constant<is_move_assignable_v<T>>;
@@ -111,10 +121,11 @@ template <typename T> using is_move_assignable
 // Defined true for array of default_assignable element type.
 //
 template <typename T>
-concept default_assignable =
-  requires (all_extents_removed_t<T> v) {
-    static_cast<all_extents_removed_t<T>>(v) = {};
-  };
+concept default_assignable = (is_copyable_array
+  ? requires (T v) { static_cast<T>(v) = {}; }
+  : requires (all_extents_removed_t<T> v) {
+      static_cast<all_extents_removed_t<T>>(v) = {};
+    });
 
 // assign_to functor, customization point
 // invoked by assign(l) function for assign_toable types
@@ -125,10 +136,11 @@ template <typename L> assign_to(L&&) -> assign_to<L&&>;
 template <typename L> concept assign_toable =
   requires { typename assign_to<L>::value_type; };
 
-// assign_to specialization for array assignment
+// assign_to<c_array> specialization for array assignment, if needed
 // (note: operator=(R) -> L& always returns unwrapped type, not wrapper)
 //
 template <c_array L>
+  requires (! std::copyable<L>)
 struct assign_to<L>
 {
   L& l;
