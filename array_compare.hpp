@@ -13,13 +13,13 @@
 
   Replacements for C++20 std library facilities for generic comparison
   extended to support C arrays. Only same-size, same shape, arrays are
-  considered comparable. Multidimensional arrays are compared as-if flat.
+  considered comparable. Multidimensional arrays compare as-if flat.
 
   Depends on <compare> and c_array_support.hpp
 
-  Avoids <algorithm> or <functional> dependency by implementing algorithms
-  similar to std::lexicographical_compare_three_way, ranges equality, etc.
-  tailored to same-shape C arrays, using flat indexing rather than recursion
+  Avoids <algorithm> or <functional> dependency, implementing algorithms
+  similar to std::lexicographical_compare_three_way and ranges equality
+  for same-shape C arrays by flat indexing rather than by recursion
   (currently lacking optimizations such as memcmp specializations).
 
   Concepts:
@@ -41,23 +41,23 @@
   =====
   Usage is the same as the std versions, except that arrays are compared:
 
-      constexpr char hello[] = "hello";
-      std::ranges::equal_to{}( "hello", hello );  // false, warning if lucky
-      assert( ltl::equal_to{}( "hello", hello) ); // true
+    constexpr char hello[] = "hello";
+    std::ranges::equal_to{}( "hello", hello );  // false, warns if lucky
+    assert( ltl::equal_to{}( "hello", hello) ); // true
 
-      std::ranges::less{}("hello","world"); // indeterminate, warning if lucky
-      assert( ltl::less{}("hello","world") ); // true
+    std::ranges::less{}("hello","world"); // indeterminate, maybe warns
+    assert( ltl::less{}("hello","world") ); // true
 
-      std::compare_three_way{}("hello","world"); // compile fail
-      ltl::compare_three_way{}("hello","world") < 0; // true
+    std::compare_three_way{}("hello","world"); // compile fail
+    ltl::compare_three_way{}("hello","world") < 0; // true
 
-      int a[2][2] {{0,1},{2,3}}, b[2][2] {{0,1},{2,3}};
+    int a[2][2] {{0,1},{2,3}}, b[2][2] {{0,1},{2,3}};
 
-      ltl::compare_three_way{}( a, b ) > 0;
-      ltl::compare_three_way{}( a, {{0,1},{2,2}} ) > 0;
+    ltl::compare_three_way{}( a, b ) == 0;
+    ltl::compare_three_way{}( a, {{0,1},{2,2}} ) > 0;
 
-  The ltl functors accept rvalue array ^^^ braced-initializer list as the RHS.
-  See the ltl::tupl implementation for example usage in array member support.
+  The ltl functors accept braced-initializer list rvalue array RHS.
+  See ltl::tupl for example usage in comparing array reference members.
 
   Raison d'etre
   =============
@@ -65,7 +65,8 @@
   to fix array comparison or to assist generic code in comparing arrays.
 
   C++20 introduces operator<=> for three way comparison and allows
-  classes to default <=> and/or == including for array members.
+  classes to default <=> and/or == including for array members
+  (but not for reference members in general, including array references)
 
   The std::compare_three_way functor defined in <compare> and the ranges
   comparison functors std::ranges::equal_to, etc., do not support array,
@@ -96,6 +97,9 @@
 template <typename A, class Cat = std::partial_ordering>
 concept three_way_comparable =
    std::three_way_comparable<all_extents_removed_t<A>, Cat>;
+//
+template <typename T> using is_three_way_comparable
+         = std::bool_constant< three_way_comparable<T>>;
 
 template <typename L, typename R, class Cat = std::partial_ordering>
 concept three_way_comparable_with =
@@ -106,6 +110,9 @@ concept three_way_comparable_with =
 template <typename A>
 concept equality_comparable =
    std::equality_comparable<all_extents_removed_t<A>>;
+//
+template <typename T> using is_equality_comparable
+         = std::bool_constant< equality_comparable<T>>;
 
 template <typename L, typename R>
 concept equality_comparable_with =
@@ -197,7 +204,8 @@ struct compare_three_way
   using is_transparent = void;
 };
 
-// equal_to functor corrected to compare arrays (rather than array ids)
+// equal_to functor corrected to compare arrays, not array ids
+//
 struct equal_to
 {
   template <typename L, typename R>
@@ -228,13 +236,15 @@ struct equal_to
   using is_transparent = void;
 };
 
-// not_equal_to functor corrected to compare arrays (rather than array ids)
+// not_equal_to functor corrected to compare arrays, not array ids
+//
 struct not_equal_to
 {
   template <typename L, typename R>
-    requires (equality_comparable_with<L,R>
-           || impl::pointer_equality_comparable_with<all_extents_removed_t<L>,
-                                                     all_extents_removed_t<R>>)
+    requires (
+      equality_comparable_with<L,R> ||
+      impl::pointer_equality_comparable_with<all_extents_removed_t<L>,
+                                             all_extents_removed_t<R>>)
   constexpr bool operator()(L&& l, R&& r) const
     noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
   {
@@ -252,13 +262,15 @@ struct not_equal_to
 };
 
 
-// less functor corrected to compare arrays (rather than array ids)
+// less functor corrected to compare arrays, not array ids
+//
 struct less
 {
   template <typename L, typename R>
-    requires (totally_ordered_with<L,R>
-          || impl::pointer_less_than_comparable_with<all_extents_removed_t<L>,
-                                                     all_extents_removed_t<R>>)
+    requires (
+      totally_ordered_with<L,R> ||
+      impl::pointer_less_than_comparable_with<all_extents_removed_t<L>,
+                                              all_extents_removed_t<R>>)
   constexpr bool operator()(L&& l, R&& r) const
     noexcept(noexcept(flat_index((L&&)l) < flat_index((R&&)r)))
   {
@@ -266,10 +278,12 @@ struct less
     {
       if (std::is_constant_evaluated())
         return l < r;
-      else
+      else {
+        using void_cv = void const volatile;
         return
-          reinterpret_cast<UINTPTR>(static_cast<const volatile void*>((L&&)l))
-        < reinterpret_cast<UINTPTR>(static_cast<const volatile void*>((R&&)r));
+          reinterpret_cast<UINTPTR>(static_cast<void_cv*>((L&&)l))
+        < reinterpret_cast<UINTPTR>(static_cast<void_cv*>((R&&)r));
+      }
     }
     else if constexpr (! c_array<L>)
     {
@@ -324,25 +338,23 @@ inline constexpr bool GCC10_ARRAY_COMPARE_WORKAROUND = []{
 //   trait to check if member of type T can have defaulted <=>
 //
 template <typename T>
-inline constexpr bool member_default_3way = []
-{
-  if constexpr (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND)
-    return false;
-  else
-    return std::three_way_comparable<impl::member_default_3way_check<T>>;
-}();
+inline constexpr bool member_default_3way
+      = std::three_way_comparable<impl::member_default_3way_check<T>>
+        && ! (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+
+template <typename T> using is_member_default_3way
+          = std::bool_constant<member_default_3way<T>>;
 
 // member_default_equality
 //   trait to check if member of type T can have defaulted ==
 //
 template <typename T>
-inline constexpr bool member_default_equality = []
-{
-  if constexpr (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND)
-    return false;
-  else
-    return std::equality_comparable<impl::member_default_equality_check<T>>;
-}();
+inline constexpr bool member_default_equality
+      = std::equality_comparable<impl::member_default_equality_check<T>>
+        && ! (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+
+template <typename T> using is_member_default_equality
+          = std::bool_constant<member_default_equality<T>>;
 
 #include "namespace.hpp"
 
