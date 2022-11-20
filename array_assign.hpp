@@ -250,6 +250,18 @@ constexpr decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
     }
 }
 
+template <c_array L, typename...T>
+  requires (assignable_from<extent_removed_t<L>,T> && ...)
+constexpr auto& assign_elements(L&& t, T&&...v)
+  noexcept(noexcept((assign(extent_removed_t<L>(*t), (T&&)v),...)))
+{
+  static_assert(sizeof...(T) == std::extent_v<std::remove_cvref_t<L>>,
+               "assign_elements requires all elements to be assigned.");
+  auto p = t;
+  (assign(static_cast<extent_removed_t<L>>(*p++), (T&&)v),...);
+  return t;
+}
+
 #include "namespace.hpp"
 
 #endif // LTL_ARRAY_ASSIGN_HPP
