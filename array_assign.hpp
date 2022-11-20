@@ -11,70 +11,87 @@
   array_assign.hpp
   ================
 
-  Function assign(a,b) provides a uniform way to assign to unknown types
-  in generic code, working for arrays as well as assignable types.
+  Requires C++20 and depends on <concepts> and "c_array_support.hpp".
 
-  It's a 'polyfill' until C++ adds array copy semantics to the language
-  as proposed in C++ wg21.link:/P1997 "Relaxing restrictions on array".
-  It automatically detects such language support and switches to use it.
+  This header defines 'assign()', a generic assignment function, and its
+  customization point 'assign_to', with C array specialization:
 
-  It requires C++20 and depends on <concepts> and "c_array_support.hpp".
+   * assign_to<T[N]> an assignable reference-wrapper for array variables
+   * assign(l,r) a uniform assignment syntax for lvalue variables
+   * assign_elements(l,e...) assigns elements directly by move or copy
 
-  Problem
-  =======
-  Assignment of C arrays is ill-formed today, e.g. given  int a[2]{};
+  Traits and concepts for assign() are defined as versions of std traits
+  that check element type e = ltl::all_extents_removed<T> instead of T:
 
-    int b[2] = a; // error: array must be initialized with a braced init
-    a = b;        // error: array type 'int [2]' is not assignable
-    a = {1,2};    // error: assigning to an array from an init-list
+   * ltl::is_assignable_v<T>      = std::is_assignable_v<e>
+   * ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
+   * ltl::is_move_assignable_v<T> = std::is_move_assignable_v<e>
 
-  Sadly, array copy initialization is out of reach of library solution
-  (despite special cases: auto c=[a]{}; auto [a0,a1]=a; char s[]{"s"};),
-  as is array by-value function argument and return type.
+        ... plus all _trivially_ and _nothrow_ variants ...
 
-  Array assignment, on the other hand, is straightforward to implement
+   * ltl::assignable_from<L,R> = std::assignable_from<eL,eR>
+                                      && same_extents<L,R>
+
+  A new concept is introduced for assignment from empty braces = {}
+
+   * ltl::default_assignable<T> true if v={}; is well formed for v : e
+
+  (similar to std default_initializable<e> && assignable_from<e&,e>).
+
+  The ltl traits clearly lie about operator= (use std traits for that).
+  They'll be true and agree with std traits once array copy semantics
+  is implemented - wg21.link:/P1997 "Relaxing restrictions on array".
+  Array copyability is automatically detected and used if possible.
+
+  The problem
+  ===========
+
+  Assignment of C arrays is ill-formed today, e.g. given  int r[2] = {};
+
+    int l[2] = r; // error: array must be initialized via braced-init
+    l = r;        // error: array type 'int [2]' is not assignable
+    l = {1,2};    // error: assigning to an array from an init-list
+
+  C array copy initialization is out of reach of library solution, as is
+  array as a function return type (or as a by-value function argument).
+
+  C array assignment, on the other hand, is straightforward to implement
   but operator= can't be overloaded for array so can't be used directly.
 
   Usage
   =====
-    ltl::assign(a,b)     or  ltl::assign(a) = b
-    ltl::assign(a,{1,2}) or  ltl::assign(a) = {1,2}
-    ltl::assign(a,{})    or  ltl::assign(a) = {}   // e={} forall e in a
+    ltl::assign(l,r)     or  ltl::assign(l) = r
+    ltl::assign(l,{})    or  ltl::assign(l) = {}
+    ltl::assign(l,{1,2}) or  ltl::assign(l) = {1,2}
+    ltl::assign_elements(l,4,2)
 
-  An lvalue reference to a is returned, as for a=b. To constrain assign
-  usage, use polyfill versions of std assignability traits and concepts:
+  An lvalue reference to l is returned, as for regular assignment l=r.
 
-   ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<E>
-   ltl::is_move_assignable_v<T> = std::is_move_assignable_v<E>
-   ltl::assignable_from<L,R> = std::assignable_from<EL,ER>
-                               (&& L and R have the same extents)
-
-  They check element type E = ltl::all_extents_removed<T> instead of T.
-  A new concept is introduced to capture assignment from empty braces:
-
-   ltl::default_assignable<T> true if E v{}; v={}; is well formed
-                              similar to (std::default_initializable<E>
-                                          && std::assignable_from<E&,E>)
   assign_to
   =========
-  Array assign is done by reference-wrapper class assign_to<c_array>:
+  The customization point class template assign_to has a specialization
+  for C array, defined only if array copy semantics is not detected.
 
-   ltl::assign_to{a} = b; // calls assign_to<int[2]>::operator=(b)
-   ltl::assign_to<T> Customize by specializing with operator= overloads,
-                     & define a value_type alias for detection purposes.
-   ltl::assign_toable<T> true if T has typename assign_to<T>::value_type
+  assign_to is not intended to be used directly.
+  assign(l) delegates to assign_to if assign_to<L> specialization exists
 
-  User specialization of assign_to is not recommended. It's specialized
-  here only for C arrays, and only if they're not copyable in language.
-  Don't use assign_to directly, use it via an indirect dispatcher:
+   ltl::assign(l)   returns assign_to{l}
+   ltl::assign(l,r) returns assign_to{l} = r
+                    calling assign_to<L>::operator=(r)
 
-   ltl::assign(l) returns assign_to<L>, if extant, else a reference to l
-   ltl::assign(l,r) delegates to assign_to<L> if it is specialized for L
-                    else for assignable types just does assignment l = r
+  If assign_to is not specialized for L then assign(l) returns lvalue l
+  and assign(l,r) just returns the result of assignment l = r
+
+  assign_elements allows to directly move or copy assign to elements of
+  an array, avoiding construction and destruction of an rvalue source.
+
+  A specialization of assign_to is provided for ltl::tupl along with an
+  overload of assign_elements.
+
   Performance
   ===========
   Copy optimizations such as memcpy specializations are not done, yet.
-  Nested array copies have constexpr and runtime implementations.
+  Nested array copies have both constexpr and runtime implementations.
 */
 
 #include <concepts>
@@ -97,28 +114,47 @@ concept assignable_from = (is_copyable_array
    && same_extents<std::remove_cvref_t<L>,
                    std::remove_cvref_t<R>>);
 
-// is_copy_assignable_v<T> array version of std::is_copy_assignable_v
+// Macro to stamp out the three 2-arg is_X_assignable<T,U> traits
+#define IS_X_ASSIGNABLE(X)\
+template <typename T, typename U>\
+inline constexpr bool is##X##_assignable_v = (is_copyable_array\
+               ? std::is##X##_assignable_v<T,U>\
+               : std::is##X##_assignable_v<all_extents_removed_t<T>,\
+                                           all_extents_removed_t<U>>);\
+\
+template <typename T, typename U> using is##X##_assignable\
+                   = std::bool_constant<is##X##_assignable_v<T,U>>;
+
+IS_X_ASSIGNABLE()                // is_assignable<T,U>
+IS_X_ASSIGNABLE(_trivially)      // is_trivially_assignable<T,U>
+IS_X_ASSIGNABLE(_nothrow)        // is_nothrow_assignable<T,U>
+
+#undef IS_X_ASSIGNABLE
+
+// Macro to stamp out the six 1-arg is_X_assignable<T> traits
+#define IS_X_ASSIGNABLE(X)\
+template <typename T>\
+inline constexpr bool is##X##_assignable_v = (is_copyable_array\
+               ? std::is##X##_assignable_v<T>\
+               : std::is##X##_assignable_v<all_extents_removed_t<T>>);\
+\
+template <typename T> using is##X##_assignable\
+       = std::bool_constant<is##X##_assignable_v<T>>;
+
+// is_X_assignable<T> array versions of std::is_X_assignable traits
 //
-template <typename T>
-inline constexpr bool is_copy_assignable_v = (is_copyable_array
-               ? std::is_copy_assignable_v<T>
-               : std::is_copy_assignable_v<all_extents_removed_t<T>>);
+IS_X_ASSIGNABLE(_copy)           // is_copy_assignable<T>
+IS_X_ASSIGNABLE(_move)           // is_move_assignable<T>
+IS_X_ASSIGNABLE(_trivially_copy) // is_trivially_copy_assignable<T>
+IS_X_ASSIGNABLE(_trivially_move) // is_trivially_move_assignable<T>
+IS_X_ASSIGNABLE(_nothrow_copy)   // is_nothrow_copy_assignable<T>
+IS_X_ASSIGNABLE(_nothrow_move)   // is_nothrow_move_assignable<T>
 
-template <typename T> using is_copy_assignable
-       = std::bool_constant<is_copy_assignable_v<T>>;
+#undef IS_X_ASSIGNABLE
 
-// is_move_assignable_v<T> array version of std::is_move_assignable_v
-//
-template <typename T>
-inline constexpr bool is_move_assignable_v = (is_copyable_array
-               ? std::is_move_assignable_v<T>
-               : std::is_move_assignable_v<all_extents_removed_t<T>>);
-
-template <typename T> using is_move_assignable
-       = std::bool_constant<is_move_assignable_v<T>>;
-
-// default_assignable<T> can be assigned from an empty braced init-list
-// Defined true for array of default_assignable element type.
+// default_assignable<T> concept:
+// = elements can be assigned to from an empty braced init-list, v = {}
+//   (true for array of default_assignable element type).
 //
 template <typename T>
 concept default_assignable = (is_copyable_array
@@ -127,17 +163,18 @@ concept default_assignable = (is_copyable_array
       static_cast<all_extents_removed_t<T>>(v) = {};
     });
 
-// assign_to functor, customization point
-// invoked by assign(l) function for assign_toable types
+// assign_to customization point to specialize as a reference-wrapper
+//                                  with operator= overloads
+// invoked by assign() function for types with assign_to specialization
 //
 template <typename L> struct assign_to;
 template <typename L> assign_to(L&&) -> assign_to<L&&>;
 
-template <typename L> concept assign_toable =
-  requires { typename assign_to<L>::value_type; };
+template <typename L> concept assign_toable
+           = requires (L l) { assign_to<L>{l}; };
 
-// assign_to<c_array> specialization for array assignment, if needed
-// (note: operator=(R) -> L& always returns unwrapped type, not wrapper)
+// assign_to<c_array> specialization for array assignment, if needed.
+// operator=(R) -> L& returns the unwrapped type, not the wrapper type.
 //
 template <c_array L>
   requires (! std::copyable<L>)
