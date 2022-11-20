@@ -1,5 +1,8 @@
 #include "array_assign.hpp"
 
+static_assert( ltl::assign_toable<int[2]> );
+static_assert( ! ltl::assign_toable<int> );
+
 // Default-assignable tests
 
 // ltl default_assignable concept is implied by this conjunction:

@@ -171,7 +171,7 @@ template <typename L> struct assign_to;
 template <typename L> assign_to(L&&) -> assign_to<L&&>;
 
 template <typename L> concept assign_toable
-           = requires (L l) { assign_to<L>{l}; };
+          = requires { sizeof(assign_to<L>); };
 
 // assign_to<c_array> specialization for array assignment, if needed.
 // operator=(R) -> L& returns the unwrapped type, not the wrapper type.
