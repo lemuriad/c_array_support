@@ -168,6 +168,10 @@ concept empty_list_assignable = (is_copyable_array
       static_cast<all_extents_removed_t<T>>(v) = {};
     });
 
+template <typename T>
+using is_nothrow_empty_list_assignable = std::bool_constant<
+         noexcept(std::declval<all_extents_removed_t<T>&>() = {})>;
+
 // assign_to customization point to specialize as a reference-wrapper
 //                                  with operator= overloads
 // invoked by assign() function for types with assign_to specialization
