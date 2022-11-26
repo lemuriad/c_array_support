@@ -5,7 +5,7 @@ static_assert( ! ltl::assign_toable<int> );
 
 // Default-assignable tests
 
-// ltl default_assignable concept is implied by this conjunction:
+// ltl empty_list_assignable concept is implied by this conjunction:
 template <typename T>
 concept default_init_assignable =
     std::default_initializable<std::remove_reference_t<T>>
@@ -19,19 +19,19 @@ static_assert( ! default_init_assignable<int const> );
 static_assert( ! default_init_assignable<int const&> );
 static_assert( ! default_init_assignable<int const&&> );
 
-static_assert(   ltl::default_assignable<int&> );
-static_assert( ! ltl::default_assignable<int> );
-static_assert( ! ltl::default_assignable<int&&> );
+static_assert(   ltl::empty_list_assignable<int&> );
+static_assert( ! ltl::empty_list_assignable<int> );
+static_assert( ! ltl::empty_list_assignable<int&&> );
 
-static_assert( ! ltl::default_assignable<int const> );
-static_assert( ! ltl::default_assignable<int const&> );
-static_assert( ! ltl::default_assignable<int const&&> );
+static_assert( ! ltl::empty_list_assignable<int const> );
+static_assert( ! ltl::empty_list_assignable<int const&> );
+static_assert( ! ltl::empty_list_assignable<int const&&> );
 
 // An explicit default constructor breaks implicit ={}
 struct X { explicit consteval X() = default; };
 
 static_assert( ! default_init_assignable<X> );
-static_assert( ! ltl::default_assignable<X> );
+static_assert( ! ltl::empty_list_assignable<X> );
 
 struct empty{};
 
@@ -55,25 +55,25 @@ static_assert(   default_init_assignable<wrap<>&> );
 static_assert( ! default_init_assignable<wrap<>> );
 static_assert( ! default_init_assignable<wrap<>&&> );
 
-static_assert( ltl::default_assignable<wrap<>&> );
-static_assert( ltl::default_assignable<wrap<>> );
-static_assert( ltl::default_assignable<wrap<>&&> );
+static_assert( ltl::empty_list_assignable<wrap<>&> );
+static_assert( ltl::empty_list_assignable<wrap<>> );
+static_assert( ltl::empty_list_assignable<wrap<>&&> );
 
 static_assert(   default_init_assignable<wrap<int>&> );
 static_assert( ! default_init_assignable<wrap<int>> );
 static_assert( ! default_init_assignable<wrap<int>&&> );
 
-static_assert( ltl::default_assignable<wrap<int>&> );
-static_assert( ltl::default_assignable<wrap<int>> );
-static_assert( ltl::default_assignable<wrap<int>&&> );
+static_assert( ltl::empty_list_assignable<wrap<int>&> );
+static_assert( ltl::empty_list_assignable<wrap<int>> );
+static_assert( ltl::empty_list_assignable<wrap<int>&&> );
 
 static_assert( ! default_init_assignable<wrap<int&>&> );
 static_assert( ! default_init_assignable<wrap<int&>> );
 static_assert( ! default_init_assignable<wrap<int&>&&> );
 
-static_assert( ltl::default_assignable<wrap<int&>&> );
-static_assert( ltl::default_assignable<wrap<int&>> );
-static_assert( ltl::default_assignable<wrap<int&>&&> );
+static_assert( ltl::empty_list_assignable<wrap<int&>&> );
+static_assert( ltl::empty_list_assignable<wrap<int&>> );
+static_assert( ltl::empty_list_assignable<wrap<int&>&&> );
 
 
 #define ASSIGNABLE_TO_VAL(L,R,OP) \

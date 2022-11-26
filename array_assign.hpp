@@ -14,10 +14,11 @@
   Requires C++20 and depends on <concepts> and "c_array_support.hpp".
 
   This header defines 'assign()', a generic assignment function, and its
-  customization point 'assign_to', with C array specialization:
+  customization point 'assign_to', with C array specialization, plus a
+  generic elementwise 'assign_elements()` function:
 
-   * assign_to<T[N]> an assignable reference-wrapper for array variables
    * assign(l,r) a uniform assignment syntax for lvalue variables
+   * assign_to<T[N]> an assignable reference-wrapper for array variables
    * assign_elements(l,e...) assigns elements directly by move or copy
 
   Traits and concepts for assign() are defined as versions of std traits
@@ -32,9 +33,10 @@
    * ltl::assignable_from<L,R> = std::assignable_from<eL,eR>
                                       && same_extents<L,R>
 
-  A new concept is introduced for assignment from empty braces = {}
+  New concepts are introduced for empty brace init and assignment: qq
 
-   * ltl::default_assignable<T> true if v={}; is well formed for v : e
+   * ltl::empty_list_initializable<T> true if T v{} is well-formed
+   * ltl::empty_list_assignable<T>    true if v = {} is well-formed
 
   (similar to std default_initializable<e> && assignable_from<e&,e>).
 
@@ -152,12 +154,15 @@ IS_X_ASSIGNABLE(_nothrow_move)   // is_nothrow_move_assignable<T>
 
 #undef IS_X_ASSIGNABLE
 
-// default_assignable<T> concept:
+template <typename T>
+concept empty_list_initializable = requires (void f(T&&)) { f({}); };
+
+// empty_list_assignable<T> concept:
 // = elements can be assigned to from an empty braced init-list, v = {}
-//   (true for array of default_assignable element type).
+//   (true for array of empty_list_assignable element type).
 //
 template <typename T>
-concept default_assignable = (is_copyable_array
+concept empty_list_assignable = (is_copyable_array
   ? requires (T v) { static_cast<T>(v) = {}; }
   : requires (all_extents_removed_t<T> v) {
       static_cast<all_extents_removed_t<T>>(v) = {};
@@ -188,7 +193,7 @@ struct assign_to<L>
   //
   constexpr L& operator=(std::true_type) const
       noexcept(noexcept(flat_index(l) = {}))
-    requires default_assignable<L&>
+    requires empty_list_assignable<L&>
   {
       for (int i = 0; i != flat_size<L>; ++i)
           flat_index(l, i) = {};

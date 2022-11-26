@@ -108,8 +108,19 @@ Depends on std `<concepts>`
 
 ### Concepts
 
-* `ltl::default_assignable` (no std equivalent)
-* `ltl::assignable_from` (c.f. std)
+* `ltl::assignable_from<L,R>` = `std::assignable_from<eL,eR>
+&& same_extents<L,R>`
+
+* `ltl::empty_list_initializable` (no std equivalent)
+* `ltl::empty_list_assignable` (no std equivalent)
+
+### Traits
+
+* ltl::is_assignable_v<T>      = std::is_assignable_v<e>
+* ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
+* ltl::is_move_assignable_v<T> = std::is_move_assignable_v<e>
+
+     ... plus all _trivially_ and _nothrow_ variants ...
 
 ### Functors
 

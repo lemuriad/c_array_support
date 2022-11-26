@@ -162,7 +162,8 @@ Depends on std `<concepts>` and `c_array_support.hpp`
 
 ### Concepts
 
-* `ltl::default_assignable` (no std equivalent)
+* `ltl::empty_list_initializable` (no std equivalent)
+* `ltl::empty_list_assignable` (no std equivalent)
 * `ltl::assignable_from` (c.f. std)
 
 ### Functors
