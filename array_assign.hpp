@@ -156,6 +156,10 @@ IS_X_ASSIGNABLE(_nothrow_move)   // is_nothrow_move_assignable<T>
 
 template <typename T>
 concept empty_list_initializable = requires (void f(T&&)) { f({}); };
+//
+template <typename T>
+using is_empty_list_initializable = std::bool_constant<
+         empty_list_initializable<T> >;
 
 // empty_list_assignable<T> concept:
 // = elements can be assigned to from an empty braced init-list, v = {}
@@ -167,6 +171,10 @@ concept empty_list_assignable = (is_copyable_array
   : requires (all_extents_removed_t<T> v) {
       static_cast<all_extents_removed_t<T>>(v) = {};
     });
+
+template <typename T>
+using is_empty_list_assignable = std::bool_constant<
+         empty_list_assignable<T> >;
 
 template <typename T>
 using is_nothrow_empty_list_assignable = std::bool_constant<
