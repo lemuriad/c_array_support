@@ -172,4 +172,4 @@ Depends on std `<concepts>` and `c_array_support.hpp`
 
 -----
 [![example workflow](https://github.com/willwray/c_array_support/actions/workflows/ci.yml/badge.svg)](https://github.com/willwray/c_array_support/actions)  
-linux gcc 11, linux clang 12, macos gcc 11, windows c++latest MSVC v19.29
+linux gcc 11 & 12, clang 12 & 14, macos clang 14, windows c++latest MSVC v19.33

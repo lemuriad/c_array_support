@@ -24,36 +24,39 @@ jobs:
         config:
         - {
             name: "Linux GCC 10 Rel (C++20)", artifact: "Linux.tar.xz",
-            os: ubuntu-latest,
+            os: ubuntu-22.04,
             compiler: gcc-10,
             build_type: RelWithDebInfo,
             cc: "gcc-10", cxx: "g++-10",
-            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+          }
+        - {
+            name: "Linux GCC 12 Rel (C++20)", artifact: "Linux.tar.xz",
+            os: ubuntu-22.04,
+            compiler: gcc-12,
+            build_type: RelWithDebInfo,
+            cc: "gcc-12", cxx: "g++-12",
           }
         - {
             name: "Linux Clang 12 Rel(C++20)", artifact: "Linux.tar.xz",
-            os: ubuntu-latest,
+            os: ubuntu-22.04,
             compiler: clang-12,
             build_type: RelWithDebInfo,
             cc: "clang-12", cxx: "clang++-12",
-            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
           }
         - {
-            name: "macOS GCC 11 Rel (C++20)", artifact: "macOS.tar.xz",
-            os: macos-latest,
-            compiler: gcc-11,
+            name: "Linux Clang 14 Rel(C++20)", artifact: "Linux.tar.xz",
+            os: ubuntu-22.04,
+            compiler: clang-14,
             build_type: RelWithDebInfo,
-            cc: "gcc-11", cxx: "g++-11",
-            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
+            cc: "clang-14", cxx: "clang++-14",
           }
-        #- {
-        #    name: "macOS Clang 12 Rel (C++20)", artifact: "macOS.tar.xz",
-        #    os: macos-latest,
-        #    compiler: clang,
-        #    build_type: RelWithDebInfo,
-        #    cc: "clang", cxx: "clang++",
-        #    cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
-        #  }
+        - {
+            name: "macOS Clang 14 Rel (C++20)", artifact: "macOS.tar.xz",
+            os: macos-12,
+            compiler: clang,
+            build_type: RelWithDebInfo,
+            cc: "clang", cxx: "clang++",
+          }
         #- {
         #    name: "Windows MSVC 2019 Rel (C++20)", artifact: "Windows-MSVC.tar.xz",
         #    os: windows-latest,
@@ -73,8 +76,8 @@ jobs:
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20"
           }
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: '3.x'
     - run: pip install meson ninja
@@ -85,26 +88,3 @@ jobs:
         CXX: ${{ matrix.config.cxx }}
     - run: meson test -C ${{ matrix.config.compiler }}/ -v
 
-#  macos:
-#    runs-on: macos-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - uses: actions/setup-python@v2
-#      with:
-#        python-version: '3.x'
-#    - run: pip install meson
-#    - run: brew install pkg-config
-#    - run: meson setup build/
-#    - run: meson test -C build/ -v
-
-#  windows:
-#    runs-on: windows-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - uses: actions/setup-python@v2
-#      with:
-#        python-version: '3.x'
-#    - run: pip install meson ninja
-#    - uses: ilammy/msvc-dev-cmd@v1
-#    - run: meson setup build
-#    - run: meson test -C build -v
