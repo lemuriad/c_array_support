@@ -50,13 +50,13 @@ jobs:
             build_type: RelWithDebInfo,
             cc: "clang-14", cxx: "clang++-14",
           }
-        - {
-            name: "macOS Clang 14 Rel (C++20)", artifact: "macOS.tar.xz",
-            os: macos-12,
-            compiler: clang,
-            build_type: RelWithDebInfo,
-            cc: "clang", cxx: "clang++",
-          }
+        #- {
+        #    name: "macOS Clang 14 Rel (C++20)", artifact: "macOS.tar.xz",
+        #    os: macos-12,
+        #    compiler: clang,
+        #    build_type: RelWithDebInfo,
+        #    cc: "clang", cxx: "clang++",
+        #  }
         #- {
         #    name: "Windows MSVC 2019 Rel (C++20)", artifact: "Windows-MSVC.tar.xz",
         #    os: windows-latest,
