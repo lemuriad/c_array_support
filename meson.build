@@ -1,6 +1,6 @@
 project('c_array_support', 'cpp',
   default_options : ['cpp_std=c++20','warning_level=3'],
-  version : '0.8'
+  version : 'v1.0'
 )
 
 if meson.get_compiler('cpp').get_id() == 'msvc'
