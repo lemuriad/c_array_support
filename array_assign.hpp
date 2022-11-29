@@ -229,7 +229,7 @@ struct assign_to<L>
   constexpr L& operator=(value_type const& r) const
       noexcept(noexcept(flat_index(l) = flat_index(r)))
   {
-      return operator=<value_type const&>(r);
+      return operator=((std::remove_cvref_t<L>&&)r);
   }
 
 };
@@ -249,22 +249,16 @@ template <typename L, typename R>
 constexpr decltype(auto) assign(L&& l, R&& r)
   noexcept(noexcept(assign(l)=(R&&)r))
 {
-    if constexpr (assign_toable<L&&>)
-        return std::add_const_t<assign_to<L&&>>{l} = (R&&)r;
-    else
-        return l = (R&&)r;
+    assign(l) = (R&&)r;
 }
 
+// assign(l,init-list), moves from braced init-list elements
+//
 template <typename L>
 constexpr decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
-  noexcept(noexcept(assign(l)=r))
+  noexcept(noexcept(assign(l)=(std::remove_cvref_t<L>&&)r))
 {
-    if constexpr (assign_toable<L&&>)
-        return std::add_const_t<assign_to<L&&>>{l} = r;
-    else {
-        static_assert(std::assignable_from<L&,L const&>);
-        return l = r;
-    }
+    assign(l) = (std::remove_cvref_t<L>&&)r;
 }
 
 template <c_array L, typename...T>
