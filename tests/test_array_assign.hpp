@@ -3,6 +3,10 @@
 static_assert( ltl::assign_toable<int[2]> );
 static_assert( ! ltl::assign_toable<int> );
 
+struct explct { explicit explct() = default; };
+static_assert( ltl::empty_list_initializable<int> );
+static_assert( ! ltl::empty_list_initializable<explct> );
+
 // Default-assignable tests
 
 // ltl empty_list_assignable concept is implied by this conjunction:

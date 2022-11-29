@@ -154,6 +154,10 @@ IS_X_ASSIGNABLE(_nothrow_move)   // is_nothrow_move_assignable<T>
 
 #undef IS_X_ASSIGNABLE
 
+// empty_list_initializable<T> concept
+//  true if T can be copy initialized from empty list; T v = {};
+//   i.e. T has a default constructor, not explicit (or deleted?)
+//
 template <typename T>
 concept empty_list_initializable = requires (void f(T&&)) { f({}); };
 //
@@ -162,7 +166,7 @@ using is_empty_list_initializable = std::bool_constant<
          empty_list_initializable<T> >;
 
 // empty_list_assignable<T> concept:
-// = elements can be assigned to from an empty braced init-list, v = {}
+//  true if elements can be assigned to from an empty init-list, v = {}
 //   (true for array of empty_list_assignable element type).
 //
 template <typename T>
