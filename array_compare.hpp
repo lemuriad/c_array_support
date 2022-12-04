@@ -107,6 +107,10 @@ concept three_way_comparable_with =
                                   all_extents_removed_t<R>, Cat>
   && same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
 
+template <typename L, typename R>
+using is_three_way_comparable_with = std::bool_constant<
+         three_way_comparable_with<L,R>>;
+
 template <typename A>
 concept equality_comparable =
    std::equality_comparable<all_extents_removed_t<A>>;
@@ -119,6 +123,10 @@ concept equality_comparable_with =
    std::equality_comparable_with<all_extents_removed_t<L>,
                                  all_extents_removed_t<R>>
   && same_extents<std::remove_cvref_t<L>,std::remove_cvref_t<R>>;
+
+template <typename L, typename R>
+using is_equality_comparable_with = std::bool_constant<
+         equality_comparable_with<L,R>>;
 
 template <typename A>
 concept totally_ordered =
@@ -210,8 +218,8 @@ struct equal_to
 {
   template <typename L, typename R>
     requires (equality_comparable_with<L,R>
-           || impl::pointer_equality_comparable_with<all_extents_removed_t<L>,
-                                                     all_extents_removed_t<R>>)
+    || impl::pointer_equality_comparable_with<all_extents_removed_t<L>,
+                                              all_extents_removed_t<R>>)
   constexpr bool operator()(L&& l, R&& r) const
     noexcept(noexcept(flat_index((L&&)l) == flat_index((R&&)r)))
   {
