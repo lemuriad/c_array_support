@@ -13,11 +13,11 @@
 
   Requires C++20 and depends on <concepts> and "c_array_support.hpp".
 
-  This header defines 'assign()', a generic assignment function, and its
+  This header defines 'assign(l)', generic assignment function, and its
   customization point 'assign_to', with C array specialization, plus a
-  generic elementwise 'assign_elements()` function:
+  generic elementwise 'assign_elements(l,e...)' function:
 
-   * assign(l,r) a uniform assignment syntax for lvalue variables
+   * assign(l) = r; a uniform assignment syntax for lvalue variables
    * assign_to<T[N]> an assignable reference-wrapper for array variables
    * assign_elements(l,e...) assigns elements directly by move or copy
 
@@ -62,12 +62,12 @@
 
   Usage
   =====
-    ltl::assign(l,r)     or  ltl::assign(l) = r
-    ltl::assign(l,{})    or  ltl::assign(l) = {}
-    ltl::assign(l,{1,2}) or  ltl::assign(l) = {1,2}
+    ltl::assign(l) = r
+    ltl::assign(l) = {}
+    ltl::assign(l) = {1,2}
     ltl::assign_elements(l,4,2)
 
-  An lvalue reference to l is returned, as for regular assignment l=r.
+  An lvalue reference to l is returned, as for regular assignment l = r.
 
   assign_to
   =========
@@ -77,15 +77,8 @@
   assign_to is not intended to be used directly.
   assign(l) delegates to assign_to if assign_to<L> specialization exists
 
-   ltl::assign(l)   returns assign_to{l}
-   ltl::assign(l,r) returns assign_to{l} = r
-                    calling assign_to<L>::operator=(r)
-
-  If assign_to is not specialized for L then assign(l) returns lvalue l
-  and assign(l,r) just returns the result of assignment l = r
-
-  assign_elements allows to directly move or copy assign to elements of
-  an array, avoiding construction and destruction of an rvalue source.
+   ltl::assign(l) returns assign_to{l}
+                  or just lvalue l if assign_to isn't specialized for L
 
   A specialization of assign_to is provided for ltl::tupl along with an
   overload of assign_elements.
@@ -248,32 +241,15 @@ constexpr decltype(auto) assign(L&& l) noexcept
         return (L&&)l;
 }
 
-template <typename L, typename R>
-  requires (std::assignable_from<L&,R&&> || assign_toable<L&&>)
-constexpr decltype(auto) assign(L&& l, R&& r)
-  noexcept(noexcept(assign(l)=(R&&)r))
-{
-    assign(l) = (R&&)r;
-}
-
-// assign(l,init-list), moves from braced init-list elements
-//
-template <typename L>
-constexpr decltype(auto) assign(L&& l, std::remove_cvref_t<L> const& r)
-  noexcept(noexcept(assign(l)=(std::remove_cvref_t<L>&&)r))
-{
-    assign(l) = (std::remove_cvref_t<L>&&)r;
-}
-
 template <c_array L, typename...T>
   requires (assignable_from<extent_removed_t<L>,T> && ...)
 constexpr auto& assign_elements(L&& t, T&&...v)
-  noexcept(noexcept((assign(extent_removed_t<L>(*t), (T&&)v),...)))
+  noexcept(noexcept( ((assign(extent_removed_t<L>(*t)) = (T&&)v),...) ))
 {
   static_assert(sizeof...(T) == std::extent_v<std::remove_cvref_t<L>>,
                "assign_elements requires all elements to be assigned.");
   auto p = t;
-  (assign(static_cast<extent_removed_t<L>>(*p++), (T&&)v),...);
+  ((assign(static_cast<extent_removed_t<L>>(*p++)) = (T&&)v),...);
   return t;
 }
 

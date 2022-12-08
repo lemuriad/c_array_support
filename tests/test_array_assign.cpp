@@ -39,11 +39,6 @@ bool test_assign_scalar()
   ltl::assign(a) = 0;
   ltl::assign(b) = {};
   assert( a == 0 && b == 0 );
-  ltl::assign(a,1);
-  ltl::assign(b,{1});
-  assert( a == 1 && b == 1 );
-  ltl::assign(b,{});
-  assert( b == 0 );
 
   return true;
 }
@@ -58,13 +53,6 @@ bool test_assign_array1D()
   ltl::assign(b) = {};
   assert( b[0] == 0 && b[1] == 0 );
 
-  ltl::assign(a,{3,4});
-  ltl::assign(b,a);
-  assert( a[0] == 3 && b[0] == 3
-       && a[1] == 4 && b[1] == 4);
-  ltl::assign(b,{});
-  assert( b[0] == 0 && b[1] == 0 );
-
   return true;
 }
 
@@ -75,9 +63,9 @@ bool test_assign_array2D()
   ltl::assign(b) = a;
   assert( a[0][0] == 1 && b[0][0] == 1
        && a[1][0] == 3 && b[1][0] == 3);
-  ltl::assign(b,{});
+  ltl::assign(b) = {};
   assert( b[0][0] == 0 && b[1][0] == 0 );
-  ltl::assign(b[0],a[2]);
+  ltl::assign(b[0]) = a[2];
   assert( b[0][0] == 5 && b[0][1] == 6 );
 
   return true;

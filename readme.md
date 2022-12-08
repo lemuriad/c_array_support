@@ -38,18 +38,27 @@ Also at [boost.org](http://www.boost.org/LICENSE_1_0.txt) and accompanying file 
 
 ------------
 
-These headers provide:
+The `"c_array_support.hpp"` header provides:
 
 * Tools for dealing with possibly-nested, possibly zero-size C arrays
 * Type traits and concepts for handling C arrays alongside other types  
-in type-generic code; generic comparison and assignment operations.
+in type-generic code
+
+The `"array_assign.hpp"` and `"array_compare.hpp"` headers provide:
+
+ * Generic comparison and assignment operations.
 
 In short, support for treating C arrays as more regular types.
 
 ```mermaid
-  graph TD;
-      c_array_support.hpp -.-> array_compare.hpp;
-      c_array_support.hpp -.-> array_assign.hpp;
+  flowchart TD;
+    array_assign.hpp --> con["#lt;concepts#gt;"]
+    array_assign.hpp --> c_array_support.hpp
+    array_compare.hpp --> compare["#lt;compare#gt;"]
+    array_compare.hpp --> c_array_support.hpp
+    c_array_support.hpp --> util_traits.hpp
+    c_array_support.hpp --> ALLOW_ZERO_SIZE_ARRAY.hpp
+    util_traits.hpp --> type_traitsstd["#lt;type_traits#gt;"]
 
 ```
 
@@ -166,7 +175,7 @@ Depends on std `<concepts>` and `c_array_support.hpp`
 * `ltl::empty_list_assignable` (no std equivalent)
 * `ltl::assignable_from` (c.f. std)
 
-### Functors
+### Function
 
 * `ltl::assign` (no std equivalent)
 
