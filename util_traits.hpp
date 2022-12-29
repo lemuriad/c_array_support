@@ -12,6 +12,16 @@
 
 #include "namespace.hpp"
 
+// same_ish<T,U> concept utility, removes cvref to match qualifed types
+//                                (ToDo: move to a generic traits lib)
+template <typename T, typename U>
+concept same_ish = std::is_same_v<U, std::remove_cvref_t<T>>;
+
+// rvalue<T> concept utility, false for lvalue T
+//                                (ToDo: move to a generic traits lib)
+template <typename T>
+concept rvalue = std::is_rvalue_reference_v<T&&>;
+
 // apply_ref and copy_ref utilities
 //
 namespace impl {
