@@ -99,6 +99,24 @@
 //
 inline constexpr bool is_copyable_array = std::copyable<int[1]>;
 
+// Macro to stamp out the three 2-arg is_X_constructible<T,U> traits
+#define IS_X_CONSTRUCTIBLE(X)\
+template <typename T, typename...U>\
+inline constexpr bool is##X##_constructible_v\
+              =  std::is##X##_constructible_v<T,U...>;\
+template <c_array T, same_ish<T> U>\
+inline constexpr bool is##X##_constructible_v<T,U>\
+               = std::is##X##_constructible_v<all_extents_removed_t<T>\
+                                             ,all_extents_removed_t<U>>;\
+template <typename T, typename U> using is##X##_constructible\
+                   = std::bool_constant<is##X##_constructible_v<T,U>>;
+
+IS_X_CONSTRUCTIBLE()                // is_constructible<T,U>
+IS_X_CONSTRUCTIBLE(_trivially)      // is_trivially_constructible<T,U>
+IS_X_CONSTRUCTIBLE(_nothrow)        // is_nothrow_constructible<T,U>
+
+#undef IS_X_CONSTRUCTIBLE
+
 // assignable_from<L,R> array-enabled version of std::assignable_from
 //
 template <typename L, typename R>
