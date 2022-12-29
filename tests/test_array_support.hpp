@@ -74,6 +74,8 @@ static_assert( ! ltl::is_bounded_array_v<int(&)[]> && ! ltl::is_array_v<int(&)[]
 static_assert( ! ltl::is_bounded_array_v<int()>    && ! ltl::is_array_v<int()> );
 
 // flat_size<A> trait tests
+static_assert( ltl::flat_size<int> == 1 );
+static_assert( ltl::flat_size<int&> == 1 );
 static_assert( ltl::flat_size<int0> == 0 );
 
 static_assert( ltl::flat_size<int const(&&)[2]> == 2 );
@@ -198,6 +200,16 @@ static_assert( std::is_same_v< decltype(ltl::subscript(cint2)),
                                int const&> );
 
 // flat_index(a,i) tests
+
+constexpr int i = 0;
+static_assert( ltl::flat_index(1) == 1 );
+static_assert( ltl::flat_index(1,0) == 1 );
+static_assert( ltl::flat_index(1,1) == 1 );
+static_assert( ltl::flat_index(1,i) == 1 );
+static_assert( ltl::flat_index(i,0) == 0 );
+static_assert( ltl::flat_index(i,i) == 0 );
+static_assert( &ltl::flat_index(i) == &i );
+static_assert( &ltl::flat_index(i,0) == &i );
 
 static_assert( &ltl::flat_index(eint2) == &ltl::subscript(eint2) );
 static_assert( &ltl::flat_index(eint2) == &eint2[0] );

@@ -152,17 +152,17 @@ concept c_array = is_bounded_array_v<std::remove_cvref_t<A>>
                         && requires (std::remove_cvref_t<A> p)
                          { requires std::is_same_v<E*,decltype(p)>; };
 
-// flat_size<A>: total number of elements in A
+// flat_size<A>: total number of elements in array A, or 1 for non array
 // computed by recursion; the product of extents of all ranks of A
 // (and not by sizeof which may fail for zero-size arrays)
 //
-template <c_array Ar>
+template <typename Ar>
 inline constexpr auto flat_size = [] {
     using A = std::remove_cvref_t<Ar>;
     using E = remove_extent_t<A>;
     if constexpr (is_array_v<E>)
          return std::extent_v<A> * flat_size<E>; // recurse
-    else return std::extent_v<A>;
+    else return std::extent_v<A> + !is_array_v<A>;
 }();
 
 // same_extents<A,B>: trait to tell if A and B have the same extents;
@@ -257,19 +257,20 @@ constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0)
 //
 template <c_array A>
 constexpr auto flat_index(A&& a, std::size_t i = 0) noexcept
-           -> all_extents_removed_t<A&>
+           -> all_extents_removed_t<A&&>
 {
+  using ret = all_extents_removed_t<A&&>;
   if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
-    return flat_index_recurse(a,i);
+    return static_cast<ret>(flat_index_recurse(a,i));
   else
-    return flat_cast<A&>(a)[i];
+    return static_cast<ret>(flat_cast<A&>(a)[i]);
 }
 
-// flat_index(a) -> a;
-// requires non-array a, the identity function for non-array objects
+// flat_index(a) -> a;   the identity function for non-array objects
+// flat_index(a,i) -> a; any index value is ignored, even if non-zero
 //
 template <typename A> requires (! c_array<A>)
-constexpr auto&& flat_index(A&& a) noexcept
+constexpr A&& flat_index(A&& a, auto...) noexcept
       { return static_cast<A&&>(a); }
 
 #include "namespace.hpp"
