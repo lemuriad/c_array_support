@@ -102,7 +102,8 @@ inline constexpr bool is_copyable_array = std::copyable<int[1]>;
 // assignable_from<L,R> array-enabled version of std::assignable_from
 //
 template <typename L, typename R>
-concept assignable_from = (is_copyable_array
+concept assignable_from
+ = (is_copyable_array || ! c_array<L>
  ? std::assignable_from<L,R>
  : std::assignable_from<all_extents_removed_t<L>,
                         all_extents_removed_t<R>>
@@ -112,7 +113,8 @@ concept assignable_from = (is_copyable_array
 // Macro to stamp out the three 2-arg is_X_assignable<T,U> traits
 #define IS_X_ASSIGNABLE(X)\
 template <typename T, typename U>\
-inline constexpr bool is##X##_assignable_v = (is_copyable_array\
+inline constexpr bool is##X##_assignable_v\
+               = (is_copyable_array  || ! c_array<T>\
                ? std::is##X##_assignable_v<T,U>\
                : std::is##X##_assignable_v<all_extents_removed_t<T>,\
                                            all_extents_removed_t<U>>);\
