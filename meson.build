@@ -14,6 +14,6 @@ c_array_support_dep = declare_dependency(
   compile_args : extra_args
 )
 
-if not meson.is_subproject()
+if get_option('tests').disable_auto_if(meson.is_subproject()).allowed()
   subdir('tests')
 endif
