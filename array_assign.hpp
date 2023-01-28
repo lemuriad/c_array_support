@@ -99,23 +99,37 @@
 //
 inline constexpr bool is_copyable_array = std::copyable<int[1]>;
 
-// Macro to stamp out the three 2-arg is_X_constructible<T,U> traits
-#define IS_X_CONSTRUCTIBLE(X)\
-template <typename T, typename...U>\
-inline constexpr bool is##X##_constructible_v\
-              =  std::is##X##_constructible_v<T,U...>;\
-template <c_array T, same_ish<T> U>\
-inline constexpr bool is##X##_constructible_v<T,U>\
-               = std::is##X##_constructible_v<all_extents_removed_t<T>\
-                                             ,all_extents_removed_t<U>>;\
-template <typename T, typename U> using is##X##_constructible\
-                   = std::bool_constant<is##X##_constructible_v<T,U>>;
+// is_X_constructible<T> array versions of std::is_X_assignable traits
+//
+template <typename T, typename...U>
+inline constexpr bool is_constructible_v
+              =  std::is_constructible_v<T,U...>;
+template <c_array T, same_ish<T> U>
+inline constexpr bool is_constructible_v<T,U>
+               = std::is_constructible_v<all_extents_removed_t<T>
+                                        ,all_extents_removed_t<U>>;
+template <typename T, typename U> using is_constructible
+                   = std::bool_constant<is_constructible_v<T,U>>;
 
-IS_X_CONSTRUCTIBLE()                // is_constructible<T,U>
-IS_X_CONSTRUCTIBLE(_trivially)      // is_trivially_constructible<T,U>
-IS_X_CONSTRUCTIBLE(_nothrow)        // is_nothrow_constructible<T,U>
+template <typename T, typename...U>
+inline constexpr bool is_trivially_constructible_v
+              =  std::is_trivially_constructible_v<T,U...>;
+template <c_array T, same_ish<T> U>
+inline constexpr bool is_trivially_constructible_v<T,U>
+               = std::is_trivially_constructible_v<all_extents_removed_t<T>
+                                                  ,all_extents_removed_t<U>>;
+template <typename T, typename U> using is_trivially_constructible
+                   = std::bool_constant<is_trivially_constructible_v<T,U>>;
 
-#undef IS_X_CONSTRUCTIBLE
+template <typename T, typename...U>
+inline constexpr bool is_nothrow_constructible_v
+              =  std::is_nothrow_constructible_v<T,U...>;
+template <c_array T, same_ish<T> U>
+inline constexpr bool is_nothrow_constructible_v<T,U>
+               = std::is_nothrow_constructible_v<all_extents_removed_t<T>
+                                                ,all_extents_removed_t<U>>;
+template <typename T, typename U> using is_nothrow_constructible
+                   = std::bool_constant<is_nothrow_constructible_v<T,U>>;
 
 // assignable_from<L,R> array-enabled version of std::assignable_from
 //
@@ -128,44 +142,78 @@ concept assignable_from
    && same_extents<std::remove_cvref_t<L>,
                    std::remove_cvref_t<R>>);
 
-// Macro to stamp out the three 2-arg is_X_assignable<T,U> traits
-#define IS_X_ASSIGNABLE(X)\
-template <typename T, typename U>\
-inline constexpr bool is##X##_assignable_v\
-               = (is_copyable_array  || ! c_array<T>\
-               ? std::is##X##_assignable_v<T,U>\
-               : std::is##X##_assignable_v<all_extents_removed_t<T>,\
-                                           all_extents_removed_t<U>>);\
-\
-template <typename T, typename U> using is##X##_assignable\
-                   = std::bool_constant<is##X##_assignable_v<T,U>>;
+// is_X_assignable<T,U> array versions of std::is_X_assignable traits
+//
+template <typename T, typename U>
+inline constexpr bool is_assignable_v
+               = (is_copyable_array || ! c_array<T>
+               ? std::is_assignable_v<T,U>
+               : std::is_assignable_v<all_extents_removed_t<T>,
+                                      all_extents_removed_t<U>>);
+template <typename T, typename U> using is_assignable
+                   = std::bool_constant<is_assignable_v<T,U>>;
 
-IS_X_ASSIGNABLE()                // is_assignable<T,U>
-IS_X_ASSIGNABLE(_trivially)      // is_trivially_assignable<T,U>
-IS_X_ASSIGNABLE(_nothrow)        // is_nothrow_assignable<T,U>
+template <typename T, typename U>
+inline constexpr bool is_trivially_assignable_v
+               = (is_copyable_array || ! c_array<T>
+               ? std::is_trivially_assignable_v<T,U>
+               : std::is_trivially_assignable_v<all_extents_removed_t<T>,
+                                                all_extents_removed_t<U>>);
+template <typename T, typename U> using is_trivially_assignable
+                   = std::bool_constant<is_trivially_assignable_v<T,U>>;
 
-#undef IS_X_ASSIGNABLE
-
-// Macro to stamp out the six 1-arg is_X_assignable<T> traits
-#define IS_X_ASSIGNABLE(X)\
-template <typename T>\
-inline constexpr bool is##X##_assignable_v = (is_copyable_array\
-               ? std::is##X##_assignable_v<T>\
-               : std::is##X##_assignable_v<all_extents_removed_t<T>>);\
-\
-template <typename T> using is##X##_assignable\
-       = std::bool_constant<is##X##_assignable_v<T>>;
+template <typename T, typename U>
+inline constexpr bool is_nothrow_assignable_v
+               = (is_copyable_array || ! c_array<T>
+               ? std::is_nothrow_assignable_v<T,U>
+               : std::is_nothrow_assignable_v<all_extents_removed_t<T>,
+                                              all_extents_removed_t<U>>);
+template <typename T, typename U> using is_nothrow_assignable
+                   = std::bool_constant<is_nothrow_assignable_v<T,U>>;
 
 // is_X_assignable<T> array versions of std::is_X_assignable traits
 //
-IS_X_ASSIGNABLE(_copy)           // is_copy_assignable<T>
-IS_X_ASSIGNABLE(_move)           // is_move_assignable<T>
-IS_X_ASSIGNABLE(_trivially_copy) // is_trivially_copy_assignable<T>
-IS_X_ASSIGNABLE(_trivially_move) // is_trivially_move_assignable<T>
-IS_X_ASSIGNABLE(_nothrow_copy)   // is_nothrow_copy_assignable<T>
-IS_X_ASSIGNABLE(_nothrow_move)   // is_nothrow_move_assignable<T>
+template <typename T>
+inline constexpr bool is_copy_assignable_v = (is_copyable_array
+               ? std::is_copy_assignable_v<T>
+               : std::is_copy_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_copy_assignable
+       = std::bool_constant<is_copy_assignable_v<T>>;
 
-#undef IS_X_ASSIGNABLE
+template <typename T>
+inline constexpr bool is_move_assignable_v = (is_copyable_array
+               ? std::is_move_assignable_v<T>
+               : std::is_move_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_move_assignable
+       = std::bool_constant<is_move_assignable_v<T>>;
+
+template <typename T>
+inline constexpr bool is_trivially_copy_assignable_v = (is_copyable_array
+               ? std::is_trivially_copy_assignable_v<T>
+               : std::is_trivially_copy_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_trivially_copy_assignable
+       = std::bool_constant<is_trivially_copy_assignable_v<T>>;
+
+template <typename T>
+inline constexpr bool is_trivially_move_assignable_v = (is_copyable_array
+               ? std::is_trivially_move_assignable_v<T>
+               : std::is_trivially_move_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_trivially_move_assignable
+       = std::bool_constant<is_trivially_move_assignable_v<T>>;
+
+template <typename T>
+inline constexpr bool is_nothrow_copy_assignable_v = (is_copyable_array
+               ? std::is_nothrow_copy_assignable_v<T>
+               : std::is_nothrow_copy_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_nothrow_copy_assignable
+       = std::bool_constant<is_nothrow_copy_assignable_v<T>>;
+
+template <typename T>
+inline constexpr bool is_nothrow_move_assignable_v = (is_copyable_array
+               ? std::is_nothrow_move_assignable_v<T>
+               : std::is_nothrow_move_assignable_v<all_extents_removed_t<T>>);
+template <typename T> using is_nothrow_move_assignable
+       = std::bool_constant<is_nothrow_move_assignable_v<T>>;
 
 // empty_list_initializable<T> concept
 //  true if T can be copy initialized from empty list; T v = {};
