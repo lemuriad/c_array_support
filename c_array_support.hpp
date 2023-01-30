@@ -222,8 +222,8 @@ constexpr auto&& flat_cast(A&& a) noexcept {
 //  workaround for MSVC https://developercommunity.visualstudio.com/t/
 //  subscript-expression-with-an-rvalue-array-is-an-xv/1317259
 //
-template <c_array A>
-constexpr auto subscript(A&& a, std::size_t i = 0) noexcept
+template <c_array A, typename Int = int>
+constexpr auto subscript(A&& a, Int i = 0) noexcept
            -> extent_removed_t<A&&>
 {
   if constexpr (std::is_lvalue_reference_v<decltype(a)>)
@@ -239,7 +239,7 @@ constexpr auto subscript(A&& a, std::size_t i = 0) noexcept
 // implementation is constexpr-correct but may give poor runtime codegen
 // if it isn't inlined with the div/mod arithmetic folded out.
 //
-constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0)
+constexpr auto& flat_index_recurse(c_array auto& a, auto i)
   noexcept
 {
   using E = decltype(a[0]);
@@ -255,8 +255,8 @@ constexpr auto& flat_index_recurse(c_array auto& a, std::size_t i = 0)
 // Returns the element at index i of the flattened array.
 // Non-constant evaluation avoids codegen of recursive div/mod.
 //
-template <c_array A>
-constexpr auto flat_index(A&& a, std::size_t i = 0) noexcept
+template <c_array A, typename Int = int>
+constexpr auto flat_index(A&& a, Int i = 0) noexcept
            -> all_extents_removed_t<A&&>
 {
   using ret = all_extents_removed_t<A&&>;
