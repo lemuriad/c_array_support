@@ -294,7 +294,9 @@ struct assign_to<L>
   constexpr L& operator=(value_type const& r) const
       noexcept(noexcept(flat_index(l) = flat_index(r)))
   {
-      return operator=((std::remove_cvref_t<L>&&)r);
+      for (int i = 0; i != flat_size<L>; ++i)
+          flat_index(l, i) = flat_index(r, i);
+      return l;
   }
 
 };
