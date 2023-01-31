@@ -252,26 +252,48 @@ constexpr auto& flat_index_recurse(c_array auto& a, auto i)
 }
 
 // flat_index(a,i)
-// Returns the element at index i of the flattened array.
-// Non-constant evaluation avoids codegen of recursive div/mod.
+//   for non-array a returns a (the identity function, and i is ignored)
+//   else returns the element at index i of the flattened array.
+// Non-constant evaluation avoids div/mod maths, which has poor codegen.
+// Note that the index is not bounds-checked; constant evaluation fails
+// for out-of-bounds access. Non-constant evaluated access should use
+// static analysis and instrumented runs to check for bounds errors.
 //
-template <c_array A, typename Int = int>
+template <typename A, typename Int = int>
 constexpr auto flat_index(A&& a, Int i = 0) noexcept
            -> all_extents_removed_t<A&&>
 {
   using ret = all_extents_removed_t<A&&>;
-  if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
-    return static_cast<ret>(flat_index_recurse(a,i));
-  else
-    return static_cast<ret>(flat_cast<A&>(a)[i]);
-}
+  if constexpr (!c_array<A>)
+    return static_cast<A&&>(a);
+  else if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
+  {
+    using E = std::remove_cvref_t<decltype(a[0])>;
 
-// flat_index(a) -> a;   the identity function for non-array objects
-// flat_index(a,i) -> a; any index value is ignored, even if non-zero
-//
-template <typename A> requires (! c_array<A>)
-constexpr A&& flat_index(A&& a, auto...) noexcept
-      { return static_cast<A&&>(a); }
+    if constexpr (rank_v<E> == 0) {
+      return static_cast<ret>(a[i]);
+    }
+    else if constexpr (rank_v<E> == 1) {
+      constexpr auto N = std::extent_v<E>;
+      return static_cast<ret>(a[i/N][i%N]);
+    }
+    else if constexpr (rank_v<E> == 2) {
+      constexpr auto M = std::extent_v<E,0>;
+      constexpr auto N = std::extent_v<E,1>;
+      return static_cast<ret>(a[i/N/M][i/N%M][i%N]);
+    }
+    else if constexpr (rank_v<E> == 3) {
+      constexpr auto L = std::extent_v<E,0>;
+      constexpr auto M = std::extent_v<E,1>;
+      constexpr auto N = std::extent_v<E,2>;
+      return static_cast<ret>(a[i/L/M/N][i/N/M%L][i/N%M][i%N]);
+    }
+    else
+      return static_cast<ret>(flat_index_recurse(a,i));
+  }
+  else
+    return static_cast<ret>(flat_cast(a)[i]); // No bounds check
+}
 
 #include "namespace.hpp"
 
