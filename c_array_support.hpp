@@ -263,36 +263,37 @@ template <typename A, typename Int = int>
 constexpr auto flat_index(A&& a, Int i = 0) noexcept
            -> all_extents_removed_t<A&&>
 {
-  using ret = all_extents_removed_t<A&&>;
+  using R = all_extents_removed_t<A&&>;
+  constexpr auto mover = [](R&v)noexcept->R{return R(v);};
   if constexpr (!c_array<A>)
-    return static_cast<A&&>(a);
+    return mover(a);
   else if (std::is_constant_evaluated() || ! c_array_unpadded<A>)
   {
     using E = std::remove_cvref_t<decltype(a[0])>;
 
     if constexpr (rank_v<E> == 0) {
-      return static_cast<ret>(a[i]);
+      return mover(a[i]);
     }
     else if constexpr (rank_v<E> == 1) {
       constexpr auto N = std::extent_v<E>;
-      return static_cast<ret>(a[i/N][i%N]);
+      return mover(a[i/N][i%N]);
     }
     else if constexpr (rank_v<E> == 2) {
       constexpr auto M = std::extent_v<E,0>;
       constexpr auto N = std::extent_v<E,1>;
-      return static_cast<ret>(a[i/N/M][i/N%M][i%N]);
+      return mover(a[i/N/M][i/N%M][i%N]);
     }
     else if constexpr (rank_v<E> == 3) {
       constexpr auto L = std::extent_v<E,0>;
       constexpr auto M = std::extent_v<E,1>;
       constexpr auto N = std::extent_v<E,2>;
-      return static_cast<ret>(a[i/L/M/N][i/N/M%L][i/N%M][i%N]);
+      return mover(a[i/L/M/N][i/N/M%L][i/N%M][i%N]);
     }
     else
-      return static_cast<ret>(flat_index_recurse(a,i));
+      return mover(flat_index_recurse(a,i));
   }
   else
-    return static_cast<ret>(flat_cast(a)[i]); // No bounds check
+    return mover(flat_cast(a)[i]); // No bounds check
 }
 
 #include "namespace.hpp"
