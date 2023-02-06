@@ -3,6 +3,12 @@ project('c_array_support', 'cpp',
   version : 'v1.0'
 )
 
+headers = files('c_array_support.hpp', 'util_traits.hpp'
+                ,'array_assign.hpp', 'array_compare.hpp'
+                ,'namespace.hpp','ALLOW_ZERO_SIZE_ARRAY.hpp')
+
+install_headers(headers, subdir: 'c_array_support')
+
 if meson.get_compiler('cpp').get_id() == 'msvc'
   extra_args = ['/Zc:preprocessor']
 else
@@ -12,6 +18,18 @@ endif
 c_array_support_dep = declare_dependency(
   include_directories : include_directories('.'),
   compile_args : extra_args
+)
+
+if meson.version().version_compare('>=0.54.0')
+  meson.override_dependency('c_array_support', c_array_support_dep)
+endif
+
+import('pkgconfig').generate(
+  name: 'c_array_support',
+  subdirs: 'c_array_support',
+  filebase: 'c_array_support',
+  description: 'C++20 Concepts, traits and tools for handing C arrays.',
+  url: 'https://github.com/willwray/c_array_support',
 )
 
 if get_option('tests').disable_auto_if(meson.is_subproject()).allowed()
