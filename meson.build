@@ -1,6 +1,6 @@
 project('c_array_support', 'cpp',
   default_options : ['cpp_std=c++20','warning_level=3'],
-  version : 'v1.0'
+  version : 'v1.1'
 )
 
 headers = files('c_array_support.hpp', 'util_traits.hpp'
