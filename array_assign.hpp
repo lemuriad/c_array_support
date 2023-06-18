@@ -20,25 +20,25 @@
    * assign_elements(l,e...) assigns elements directly by move or copy
 
   Traits and concepts for assign() are defined as versions of std traits
-  that check element type e = ltl::all_extents_removed<T> instead of T:
+  that check element type e = lml::all_extents_removed<T> instead of T:
 
-   * ltl::is_assignable_v<T>      = std::is_assignable_v<e>
-   * ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
-   * ltl::is_move_assignable_v<T> = std::is_move_assignable_v<e>
+   * lml::is_assignable_v<T>      = std::is_assignable_v<e>
+   * lml::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
+   * lml::is_move_assignable_v<T> = std::is_move_assignable_v<e>
 
         ... plus all _trivially_ and _nothrow_ variants ...
 
-   * ltl::assignable_from<L,R> = std::assignable_from<eL,eR>
+   * lml::assignable_from<L,R> = std::assignable_from<eL,eR>
                                       && same_extents<L,R>
 
   New concepts are introduced for empty brace init and assignment: qq
 
-   * ltl::empty_list_initializable<T> true if T v{} is well-formed
-   * ltl::empty_list_assignable<T>    true if v = {} is well-formed
+   * lml::empty_list_initializable<T> true if T v{} is well-formed
+   * lml::empty_list_assignable<T>    true if v = {} is well-formed
 
   (similar to std default_initializable<e> && assignable_from<e&,e>).
 
-  The ltl traits clearly lie about operator= (use std traits for that).
+  The lml traits clearly lie about operator= (use std traits for that).
   They'll be true and agree with std traits once array copy semantics
   is implemented - wg21.link:/P1997 "Relaxing restrictions on array".
   Array copyability is automatically detected and used if possible.
@@ -60,10 +60,10 @@
 
   Usage
   =====
-    ltl::assign(l) = r
-    ltl::assign(l) = {}
-    ltl::assign(l) = {1,2}
-    ltl::assign_elements(l,4,2)
+    lml::assign(l) = r
+    lml::assign(l) = {}
+    lml::assign(l) = {1,2}
+    lml::assign_elements(l,4,2)
 
   An lvalue reference to l is returned, as for regular assignment l = r.
 
@@ -75,10 +75,10 @@
   assign_to is not intended to be used directly.
   assign(l) delegates to assign_to if assign_to<L> specialization exists
 
-   ltl::assign(l) returns assign_to{l}
+   lml::assign(l) returns assign_to{l}
                   or just lvalue l if assign_to isn't specialized for L
 
-  A specialization of assign_to is provided for ltl::tupl along with an
+  A specialization of assign_to is provided for lml::tupl along with an
   overload of assign_elements.
 
   Performance

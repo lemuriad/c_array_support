@@ -22,18 +22,18 @@
 
   Concepts:
 
-    ltl::three_way_comparable[_with]  c.f. std::three_way_comparable
-    ltl::equality_comparable[_with]   c.f. std::equality_comparable
-    ltl::totally_ordered[_with]       c.f. std::totally_ordered
+    lml::three_way_comparable[_with]  c.f. std::three_way_comparable
+    lml::equality_comparable[_with]   c.f. std::equality_comparable
+    lml::totally_ordered[_with]       c.f. std::totally_ordered
 
   Aliases:
-    ltl::compare_three_way_result_t c.f. std::compare_three_way_result_t
+    lml::compare_three_way_result_t c.f. std::compare_three_way_result_t
 
   Functors:
-    ltl::compare_three_way     c.f. std::compare_three_way
-    ltl::equal_to              c.f. std::ranges::equal_to
-    ltl::not_equal_to          c.f. std::ranges::not_equal_to
-    ltl::less                  c.f. std::ranges::less
+    lml::compare_three_way     c.f. std::compare_three_way
+    lml::equal_to              c.f. std::ranges::equal_to
+    lml::not_equal_to          c.f. std::ranges::not_equal_to
+    lml::less                  c.f. std::ranges::less
 
   Usage
   =====
@@ -41,21 +41,21 @@
 
     constexpr char hello[] = "hello";
     std::ranges::equal_to{}( "hello", hello );  // false, warns if lucky
-    assert( ltl::equal_to{}( "hello", hello) ); // true
+    assert( lml::equal_to{}( "hello", hello) ); // true
 
     std::ranges::less{}("hello","world"); // indeterminate, maybe warns
-    assert( ltl::less{}("hello","world") ); // true
+    assert( lml::less{}("hello","world") ); // true
 
     std::compare_three_way{}("hello","world"); // compile fail
-    ltl::compare_three_way{}("hello","world") < 0; // true
+    lml::compare_three_way{}("hello","world") < 0; // true
 
     int a[2][2] {{0,1},{2,3}}, b[2][2] {{0,1},{2,3}};
 
-    ltl::compare_three_way{}( a, b ) == 0;
-    ltl::compare_three_way{}( a, {{0,1},{2,2}} ) > 0;
+    lml::compare_three_way{}( a, b ) == 0;
+    lml::compare_three_way{}( a, {{0,1},{2,2}} ) > 0;
 
-  The ltl functors accept braced-initializer list rvalue array RHS.
-  See ltl::tupl for example usage in comparing array reference members.
+  The lml functors accept braced-initializer list rvalue array RHS.
+  See lml::tupl for example usage in comparing array reference members.
 
   Raison d'etre
   =============
@@ -143,7 +143,7 @@ using compare_three_way_result_t =
 
 namespace impl {
 // pointer_equality_comparable_with
-//   A helper concept for ltl::equal_to and ltl::not_equal_to
+//   A helper concept for lml::equal_to and lml::not_equal_to
 //   c.f. pointer equality requirements for std::ranges::equal_to
 //
 template <typename P, typename Q>
@@ -158,7 +158,7 @@ concept pointer_equality_comparable_with =
            { static_cast<P&&>(l).operator==(static_cast<Q&&>(r)); }
      );
 
-// pointer_less_than_comparable_with, as above for ltl::less functor
+// pointer_less_than_comparable_with, as above for lml::less functor
 //
 template <typename P, typename Q>
 concept pointer_less_than_comparable_with =

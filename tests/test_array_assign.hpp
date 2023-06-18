@@ -1,15 +1,15 @@
 #include "array_assign.hpp"
 
-static_assert( ltl::assign_toable<int[2]> );
-static_assert( ! ltl::assign_toable<int> );
+static_assert( lml::assign_toable<int[2]> );
+static_assert( ! lml::assign_toable<int> );
 
 struct explct { explicit explct() = default; };
-static_assert( ltl::empty_list_initializable<int> );
-static_assert( ! ltl::empty_list_initializable<explct> );
+static_assert( lml::empty_list_initializable<int> );
+static_assert( ! lml::empty_list_initializable<explct> );
 
 // Default-assignable tests
 
-// ltl empty_list_assignable concept is implied by this conjunction:
+// lml empty_list_assignable concept is implied by this conjunction:
 template <typename T>
 concept default_init_assignable =
     std::default_initializable<std::remove_reference_t<T>>
@@ -23,19 +23,19 @@ static_assert( ! default_init_assignable<int const> );
 static_assert( ! default_init_assignable<int const&> );
 static_assert( ! default_init_assignable<int const&&> );
 
-static_assert(   ltl::empty_list_assignable<int&> );
-static_assert( ! ltl::empty_list_assignable<int> );
-static_assert( ! ltl::empty_list_assignable<int&&> );
+static_assert(   lml::empty_list_assignable<int&> );
+static_assert( ! lml::empty_list_assignable<int> );
+static_assert( ! lml::empty_list_assignable<int&&> );
 
-static_assert( ! ltl::empty_list_assignable<int const> );
-static_assert( ! ltl::empty_list_assignable<int const&> );
-static_assert( ! ltl::empty_list_assignable<int const&&> );
+static_assert( ! lml::empty_list_assignable<int const> );
+static_assert( ! lml::empty_list_assignable<int const&> );
+static_assert( ! lml::empty_list_assignable<int const&&> );
 
 // An explicit default constructor breaks implicit ={}
 struct X { explicit consteval X() = default; };
 
 static_assert( ! default_init_assignable<X> );
-static_assert( ! ltl::empty_list_assignable<X> );
+static_assert( ! lml::empty_list_assignable<X> );
 
 struct empty{};
 
@@ -59,25 +59,25 @@ static_assert(   default_init_assignable<wrap<>&> );
 static_assert( ! default_init_assignable<wrap<>> );
 static_assert( ! default_init_assignable<wrap<>&&> );
 
-static_assert( ltl::empty_list_assignable<wrap<>&> );
-static_assert( ltl::empty_list_assignable<wrap<>> );
-static_assert( ltl::empty_list_assignable<wrap<>&&> );
+static_assert( lml::empty_list_assignable<wrap<>&> );
+static_assert( lml::empty_list_assignable<wrap<>> );
+static_assert( lml::empty_list_assignable<wrap<>&&> );
 
 static_assert(   default_init_assignable<wrap<int>&> );
 static_assert( ! default_init_assignable<wrap<int>> );
 static_assert( ! default_init_assignable<wrap<int>&&> );
 
-static_assert( ltl::empty_list_assignable<wrap<int>&> );
-static_assert( ltl::empty_list_assignable<wrap<int>> );
-static_assert( ltl::empty_list_assignable<wrap<int>&&> );
+static_assert( lml::empty_list_assignable<wrap<int>&> );
+static_assert( lml::empty_list_assignable<wrap<int>> );
+static_assert( lml::empty_list_assignable<wrap<int>&&> );
 
 static_assert( ! default_init_assignable<wrap<int&>&> );
 static_assert( ! default_init_assignable<wrap<int&>> );
 static_assert( ! default_init_assignable<wrap<int&>&&> );
 
-static_assert( ltl::empty_list_assignable<wrap<int&>&> );
-static_assert( ltl::empty_list_assignable<wrap<int&>> );
-static_assert( ltl::empty_list_assignable<wrap<int&>&&> );
+static_assert( lml::empty_list_assignable<wrap<int&>&> );
+static_assert( lml::empty_list_assignable<wrap<int&>> );
+static_assert( lml::empty_list_assignable<wrap<int&>&&> );
 
 
 #define ASSIGNABLE_TO_VAL(L,R,OP) \
@@ -120,7 +120,7 @@ namespace std {
 
   static_assert( ! ASSIGNABLE_TO_LVAL(int2,int2,&& !) );
 }
-namespace ltl {
+namespace lml {
   static_assert(   ASSIGNABLE_TO_LVAL(int,int,&&) );
   static_assert( ! ASSIGNABLE_TO_VAL(int,int,&&!) );
   static_assert( ! ASSIGNABLE_TO_RVAL(int,int,&&!) );

@@ -18,9 +18,9 @@ Depends on std `<type_traits>` header.
 
 ### Concepts
 
-* `ltl::c_array<T>`          matches C array (and references to array)
+* `lml::c_array<T>`          matches C array (and references to array)
 
-* `ltl::c_array_unpadded<T>` matches C arrays with no padding (and refs)
+* `lml::c_array_unpadded<T>` matches C arrays with no padding (and refs)
 
 The `c_array` concepts also match references to C array,
 useful in practice as arrays are passed by reference.
@@ -29,13 +29,13 @@ Unpadded nested arrays can be safely reinterpret cast to a flat array.
 
 ### Aliases
 
-* `ltl::c_array_t<T,N...>` maps variadic Args to array type -> `T[N][...]`
+* `lml::c_array_t<T,N...>` maps variadic Args to array type -> `T[N][...]`
 
-* `ltl::all_extents_removed_t<A>` remove_all_extents, under any reference qualification
+* `lml::all_extents_removed_t<A>` remove_all_extents, under any reference qualification
 
-* `ltl::flat_cast_t<A>` maps possibly nested array `A` to flattened array type  
+* `lml::flat_cast_t<A>` maps possibly nested array `A` to flattened array type  
   
-  E.g. `ltl::flat_cast_t<T[M][N][...]>` -> `T[M*N*...]`
+  E.g. `lml::flat_cast_t<T[M][N][...]>` -> `T[M*N*...]`
 
 ### Traits
 
@@ -68,27 +68,27 @@ mostly replacing std lib features, plus some detection traits.
 * Concepts:
 
 ```C++
-    ltl::three_way_comparable [_with]  c.f. std::three_way_comparable
-    ltl::equality_comparable  [_with]  c.f. std::equality_comparable
-    ltl::totally_ordered      [_with]  c.f. std::totally_ordered
+    lml::three_way_comparable [_with]  c.f. std::three_way_comparable
+    lml::equality_comparable  [_with]  c.f. std::equality_comparable
+    lml::totally_ordered      [_with]  c.f. std::totally_ordered
 
-    ltl::pointer_equality_comparable_with  (no std equivalent)
-    ltl::pointer_less_than_comparable_with (no std equivalent)
+    lml::pointer_equality_comparable_with  (no std equivalent)
+    lml::pointer_less_than_comparable_with (no std equivalent)
 ```
 
 * Aliases:
 
 ```C++
-    ltl::compare_three_way_result_t c.f. std::compare_three_way_result_t
+    lml::compare_three_way_result_t c.f. std::compare_three_way_result_t
 ```
 
 * Functors:
 
 ```C++
-    ltl::compare_three_way     c.f. std::compare_three_way
-    ltl::equal_to              c.f. std::ranges::equal_to
-    ltl::not_equal_to          c.f. std::ranges::not_equal_to
-    ltl::less                  c.f. std::ranges::less
+    lml::compare_three_way     c.f. std::compare_three_way
+    lml::equal_to              c.f. std::ranges::equal_to
+    lml::not_equal_to          c.f. std::ranges::not_equal_to
+    lml::less                  c.f. std::ranges::less
 ```
 
 If you want `greater`, `greater_equal` or `less_equal`  
@@ -108,20 +108,20 @@ Depends on std `<concepts>`
 
 ### Concepts
 
-* `ltl::assignable_from<L,R>` = `std::assignable_from<eL,eR>
+* `lml::assignable_from<L,R>` = `std::assignable_from<eL,eR>
 && same_extents<L,R>`
 
-* `ltl::empty_list_initializable` (no std equivalent)
-* `ltl::empty_list_assignable` (no std equivalent)
+* `lml::empty_list_initializable` (no std equivalent)
+* `lml::empty_list_assignable` (no std equivalent)
 
 ### Traits
 
-* ltl::is_assignable_v<T>      = std::is_assignable_v<e>
-* ltl::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
-* ltl::is_move_assignable_v<T> = std::is_move_assignable_v<e>
+* lml::is_assignable_v<T>      = std::is_assignable_v<e>
+* lml::is_copy_assignable_v<T> = std::is_copy_assignable_v<e>
+* lml::is_move_assignable_v<T> = std::is_move_assignable_v<e>
 
      ... plus all _trivially_ and _nothrow_ variants ...
 
 ### Functors
 
-* `ltl::assign` (no std equivalent)
+* `lml::assign` (no std equivalent)

@@ -26,7 +26,7 @@
   proven useful so far in practice.
 
  Replacement versions of std traits that work for T[0]:
-  (i.e. ltl::is_array_v replaces std::is_array_v, etc.)
+  (i.e. lml::is_array_v replaces std::is_array_v, etc.)
 
   - is_array_v
   - is_bounded_array_v

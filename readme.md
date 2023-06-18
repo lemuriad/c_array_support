@@ -51,7 +51,7 @@ in type-generic code
 
 The `"array_assign.hpp"` and `"array_compare.hpp"` headers provide:
 
- * Generic comparison and assignment operations.
+* Generic comparison and assignment operations.
 
 In short, support for treating C arrays as more regular types.
 
@@ -77,9 +77,9 @@ Zero-size arrays _are_ arrays too!
 Zero-size arrays _can_ be handled by compilers so generic code should support them.  
 This library is proof of feasibility that zero-size arrays can be treated as regular types.
 
-### [Documentation](#documentation.md) page
+### [Documentation](documentation.md) page
 
-------------
+-----
 
 ## `c_array_support.hpp`
 
@@ -89,24 +89,24 @@ This header provides a `c_array` concept plus tools and traits for handling poss
 nested C arrays as-if flat. All utilities are carefully coded to accept `T[0]` if possible,  
 including some std trait replacements fixed to work robustly with `T[0]`.
 
-E.g. `ltl::is_array<int[0]>` is true  
+E.g. `lml::is_array<int[0]>` is true  
 but `std::is_array<int[0]>` is false (on tested compilers, or fails to compile)
 
 ### Concepts
 
-* `ltl::c_array<T>`          matches C array, including reference-to-array type
-* `ltl::c_array_unpadded<T>` matches C arrays with no padding  
+* `lml::c_array<T>`          matches C array, including reference-to-array type
+* `lml::c_array_unpadded<T>` matches C arrays with no padding  
 (this 'unpadded' concept is a paranoid addition for protecting casts)
 
 ### Replacement `std` traits, robust to `T[0]`
 * Predicates:
-  * `ltl::is_array_v`
-  * `ltl::is_bounded_array_v`
-  * `ltl::rank_v`
+  * `lml::is_array_v`
+  * `lml::is_bounded_array_v`
+  * `lml::rank_v`
 * Type aliases:
-  * `ltl::remove_extent_t`
-  * `ltl::remove_all_extents`
-  * `ltl::remove_all_extents_t`
+  * `lml::remove_extent_t`
+  * `lml::remove_all_extents`
+  * `lml::remove_all_extents_t`
 
 (This is not a complete set of replacements
 for failing `std` traits.  
@@ -149,20 +149,20 @@ for generic comparison.
 
 ### Concepts
 
-* `ltl::three_way_comparable` [`_with`] (c.f. std)
-* `ltl::equality_comparable`  [`_with`] (c.f. std)
-* `ltl::totally_ordered`      [`_with`] (c.f. std)
+* `lml::three_way_comparable` [`_with`] (c.f. std)
+* `lml::equality_comparable`  [`_with`] (c.f. std)
+* `lml::totally_ordered`      [`_with`] (c.f. std)
 
 ### Aliases
 
-* `ltl::compare_three_way_result_t` (c.f. std)
+* `lml::compare_three_way_result_t` (c.f. std)
 
 ### Functors
 
-* `ltl::compare_three_way`     (c.f. std)
-* `ltl::equal_to`              (c.f. std)
-* `ltl::not_equal_to`          (c.f. std)
-* `ltl::less`                  (c.f. std)
+* `lml::compare_three_way`     (c.f. std)
+* `lml::equal_to`              (c.f. std)
+* `lml::not_equal_to`          (c.f. std)
+* `lml::less`                  (c.f. std)
 
 (This is not a complete set of replacement 
 comparison functors  
@@ -176,10 +176,10 @@ Depends on std `<concepts>` and `c_array_support.hpp`
 
 ### Concepts
 
-* `ltl::empty_list_initializable` (no std equivalent)
-* `ltl::empty_list_assignable` (no std equivalent)
-* `ltl::assignable_from` (c.f. std)
+* `lml::empty_list_initializable` (no std equivalent)
+* `lml::empty_list_assignable` (no std equivalent)
+* `lml::assignable_from` (c.f. std)
 
 ### Function
 
-* `ltl::assign` (no std equivalent)
+* `lml::assign` (no std equivalent)
