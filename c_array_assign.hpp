@@ -3,11 +3,11 @@
  SPDX-License-Identifier: BSL-1.0
  Repo: https://github.com/Lemuriad/c_array_support
 */
-#ifndef LML_ARRAY_ASSIGN_HPP
-#define LML_ARRAY_ASSIGN_HPP
+#ifndef LML_C_ARRAY_ASSIGN_HPP
+#define LML_C_ARRAY_ASSIGN_HPP
 /*
-  array_assign.hpp
-  ================
+  c_array_assign.hpp
+  ==================
 
   Requires C++20 and depends on <concepts> and "c_array_support.hpp".
 
@@ -323,4 +323,4 @@ constexpr auto& assign_elements(L&& t, T&&...v)
 
 #include "namespace.hpp"
 
-#endif // LML_ARRAY_ASSIGN_HPP
+#endif // LML_C_ARRAY_ASSIGN_HPP

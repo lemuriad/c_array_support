@@ -1,4 +1,4 @@
-#include "test_array_support.hpp"
+#include "test_c_array_support.hpp"
 
 int main()
 {

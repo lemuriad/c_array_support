@@ -1,4 +1,4 @@
-#include "test_array_assign.hpp"
+#include "test_c_array_assign.hpp"
 
 #include <cassert>
 

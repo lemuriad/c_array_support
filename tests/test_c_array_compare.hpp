@@ -1,4 +1,4 @@
-#include "array_compare.hpp"
+#include "c_array_compare.hpp"
 
 #if defined (_MSC_VER)
 #define EXCLUDE_MSVC(...)
@@ -102,13 +102,13 @@ static_assert( lml::equal_to{}(I2{0,1},L2{0,1}) );
 
 static_assert(   lml::member_default_3way<int> );
 static_assert(   lml::member_default_3way<int[2]>
-              || lml::impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+              || lml::impl::GCC10_C_ARRAY_COMPARE_WORKAROUND);
 static_assert(   lml::member_default_3way<int*> );
 static_assert( ! lml::member_default_3way<int&> );
 
 static_assert(   lml::member_default_equality<int> );
 static_assert(   lml::member_default_equality<int[2]>
-              || lml::impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+              || lml::impl::GCC10_C_ARRAY_COMPARE_WORKAROUND);
 static_assert(   lml::member_default_equality<int*> );
 static_assert( ! lml::member_default_equality<int&> );
 

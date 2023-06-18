@@ -6,9 +6,9 @@
 
 ### Header [`c_array_support.hpp`](#c_array_supporthpp)
 
-### Header [`array_compare.hpp`](#array_comparehpp)
+### Header [`c_array_compare.hpp`](#c_array_comparehpp)
 
-### Header [`array_assign.hpp`](#c_array_assignhpp)
+### Header [`c_array_assign.hpp`](#c_array_assignhpp)
 
 ------------
 
@@ -58,7 +58,7 @@ A workaround for MSVC [subscript-expression-with-an-rvalue-array-is-an-xvalue](h
 
 ------------
 
-## array_compare.hpp
+## c_array_compare.hpp
 
 C-array supporting comparison concepts, aliases and functors,
 mostly replacing std lib features, plus some detection traits.
@@ -102,7 +102,7 @@ then cut n paste with:
 
 ------------
 
-## array_assign.hpp
+## c_array_assign.hpp
 
 Depends on std `<concepts>`
 

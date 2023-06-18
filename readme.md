@@ -49,7 +49,7 @@ The `"c_array_support.hpp"` header provides:
 * Type traits and concepts for handling C arrays alongside other types  
 in type-generic code
 
-The `"array_assign.hpp"` and `"array_compare.hpp"` headers provide:
+The `"c_array_assign.hpp"` and `"c_array_compare.hpp"` headers provide:
 
 * Generic comparison and assignment operations.
 
@@ -57,10 +57,10 @@ In short, support for treating C arrays as more regular types.
 
 ```mermaid
   flowchart TD;
-    array_assign.hpp --> con["#lt;concepts#gt;"]
-    array_assign.hpp --> c_array_support.hpp
-    array_compare.hpp --> compare["#lt;compare#gt;"]
-    array_compare.hpp --> c_array_support.hpp
+    c_array_assign.hpp --> con["#lt;concepts#gt;"]
+    c_array_assign.hpp --> c_array_support.hpp
+    c_array_compare.hpp --> compare["#lt;compare#gt;"]
+    c_array_compare.hpp --> c_array_support.hpp
     c_array_support.hpp --> util_traits.hpp
     c_array_support.hpp --> ALLOW_ZERO_SIZE_ARRAY.hpp
     util_traits.hpp --> type_traitsstd["#lt;type_traits#gt;"]
@@ -140,7 +140,7 @@ The remaining two headers add generic support for comparison and assignment.
 
 ------------
 
-## array_compare.hpp
+## c_array_compare.hpp
 
 Depends on std `<compare>` and `c_array_support.hpp`
 
@@ -170,7 +170,7 @@ comparison functors
 
 ------------
 
-## array_assign.hpp
+## c_array_assign.hpp
 
 Depends on std `<concepts>` and `c_array_support.hpp`
 

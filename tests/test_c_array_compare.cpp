@@ -1,4 +1,4 @@
-#include "test_array_compare.hpp"
+#include "test_c_array_compare.hpp"
 
 #include <cassert>
 

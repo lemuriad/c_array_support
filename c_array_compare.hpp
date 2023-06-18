@@ -3,11 +3,11 @@
  SPDX-License-Identifier: BSL-1.0
  Repo: https://github.com/Lemuriad/c_array_support
 */
-#ifndef LML_ARRAY_COMPARE_HPP
-#define LML_ARRAY_COMPARE_HPP
+#ifndef LML_C_ARRAY_COMPARE_HPP
+#define LML_C_ARRAY_COMPARE_HPP
 /*
-  array_compare.hpp
-  =================
+  c_array_compare.hpp
+  ===================
 
   Replacements for C++20 std library facilities for generic comparison
   extended to support C arrays. Only same-size, same shape, arrays are
@@ -333,7 +333,7 @@ struct member_default_equality_check
 };
 
 // detect gcc bug 93480
-inline constexpr bool GCC10_ARRAY_COMPARE_WORKAROUND = []{
+inline constexpr bool GCC10_C_ARRAY_COMPARE_WORKAROUND = []{
   struct A { int v[1]; bool operator==(A const&) const = default; };
   return A{} != A{}; // evaluates true with gcc bug #93480
 }();
@@ -346,7 +346,7 @@ inline constexpr bool GCC10_ARRAY_COMPARE_WORKAROUND = []{
 template <typename T>
 inline constexpr bool member_default_3way
       = std::three_way_comparable<impl::member_default_3way_check<T>>
-        && ! (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+        && ! (is_array_v<T> && impl::GCC10_C_ARRAY_COMPARE_WORKAROUND);
 
 template <typename T> using is_member_default_3way
           = std::bool_constant<member_default_3way<T>>;
@@ -357,11 +357,11 @@ template <typename T> using is_member_default_3way
 template <typename T>
 inline constexpr bool member_default_equality
       = std::equality_comparable<impl::member_default_equality_check<T>>
-        && ! (is_array_v<T> && impl::GCC10_ARRAY_COMPARE_WORKAROUND);
+        && ! (is_array_v<T> && impl::GCC10_C_ARRAY_COMPARE_WORKAROUND);
 
 template <typename T> using is_member_default_equality
           = std::bool_constant<member_default_equality<T>>;
 
 #include "namespace.hpp"
 
-#endif // LML_ARRAY_COMPARE_HPP
+#endif // LML_C_ARRAY_COMPARE_HPP

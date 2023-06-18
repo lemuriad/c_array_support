@@ -4,7 +4,7 @@ project('c_array_support', 'cpp',
 )
 
 headers = files('c_array_support.hpp', 'util_traits.hpp'
-                ,'array_assign.hpp', 'array_compare.hpp'
+                ,'c_array_assign.hpp', 'c_array_compare.hpp'
                 ,'namespace.hpp','ALLOW_ZERO_SIZE_ARRAY.hpp')
 
 install_headers(headers, subdir: 'c_array_support')
