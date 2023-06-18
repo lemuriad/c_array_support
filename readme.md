@@ -2,7 +2,7 @@
 
 ## C++20 Concepts, traits and tools for handing C arrays
 
-<details><summary>Copyright &copy; 2021 Will Wray. Distributed under the Boost Software License, V1.0</summary>
+<details><summary>Copyright &copy; 2023 The Lemuriad. Distributed under the Boost Software License, V1.0</summary>
 
 ### **Boost Software License** - Version 1.0 - August 17th, 2003
 
@@ -36,7 +36,12 @@ Also at [boost.org](http://www.boost.org/LICENSE_1_0.txt) and accompanying file 
 
 </details>
 
-------------
+-----
+
+![GitHub Actions Badge](../../actions/workflows/ci.yml/badge.svg)
+GitHub Actions meson build: linux gcc10 & 12, clang 12 & 14, macos 12, windows latest
+
+-----
 
 The `"c_array_support.hpp"` header provides:
 
@@ -178,7 +183,3 @@ Depends on std `<concepts>` and `c_array_support.hpp`
 ### Function
 
 * `ltl::assign` (no std equivalent)
-
------
-[![example workflow](https://github.com/willwray/c_array_support/actions/workflows/ci.yml/badge.svg)](https://github.com/willwray/c_array_support/actions)  
-linux gcc 11 & 12, clang 12 & 14, macos clang 14, windows c++latest MSVC v19.33

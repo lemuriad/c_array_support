@@ -1,12 +1,10 @@
-//  Copyright (c) 2021 Will Wray https://keybase.io/willwray
-//
-//  Distributed under the Boost Software License, Version 1.0.
-//        http://www.boost.org/LICENSE_1_0.txt
-//
-//  Repo: https://github.com/willwray/c_array_support
-
-#ifndef LTL_C_ARRAY_SUPPORT_HPP
-#define LTL_C_ARRAY_SUPPORT_HPP
+/*
+ SPDX-FileCopyrightText: 2023 The Lemuriad <opensource@lemurianlabs.com>
+ SPDX-License-Identifier: BSL-1.0
+ Repo: https://github.com/Lemuriad/c_array_support
+*/
+#ifndef LML_C_ARRAY_SUPPORT_HPP
+#define LML_C_ARRAY_SUPPORT_HPP
 /*
   c_array_support.hpp
   ===================
@@ -298,4 +296,4 @@ constexpr auto flat_index(A&& a, Int i = 0) noexcept
 
 #include "namespace.hpp"
 
-#endif
+#endif // LML_C_ARRAY_SUPPORT_HPP

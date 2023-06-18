@@ -1,12 +1,10 @@
-//  Copyright (c) 2021 Will Wray https://keybase.io/willwray
-//
-//  Distributed under the Boost Software License, Version 1.0.
-//        http://www.boost.org/LICENSE_1_0.txt
-//
-//  Repo: https://github.com/willwray/c_array_support
-
-#ifndef LTL_UTIL_TRAITS_HPP
-#define LTL_UTIL_TRAITS_HPP
+/*
+ SPDX-FileCopyrightText: 2023 The Lemuriad <opensource@lemurianlabs.com>
+ SPDX-License-Identifier: BSL-1.0
+ Repo: https://github.com/Lemuriad/c_array_support
+*/
+#ifndef LML_UTIL_TRAITS_HPP
+#define LML_UTIL_TRAITS_HPP
 
 #include <type_traits>
 
@@ -106,4 +104,4 @@ using copy_cvref_t = typename copy_cvref<L,R>::type;
 
 #include "namespace.hpp"
 
-#endif
+#endif // LML_UTIL_TRAITS_HPP

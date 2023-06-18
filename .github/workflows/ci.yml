@@ -1,19 +1,11 @@
-# Copyright 2021 Will Wray
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE or http://boost.org/LICENSE_1_0.txt)
-
-name: ci_meson
-
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "**.cpp"
-      - "**.hpp"
   pull_request:
-    paths:
-      - "**.cpp"
-      - "**.hpp"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - readme.md
 jobs:
   meson-build:
     name: ${{ matrix.config.name }}

@@ -1,12 +1,10 @@
-//  Copyright (c) 2021 Will Wray https://keybase.io/willwray
-//
-//  Distributed under the Boost Software License, Version 1.0.
-//        http://www.boost.org/LICENSE_1_0.txt
-//
-//  Repo: https://github.com/willwray/c_array_support
-
-#ifndef LTL_ARRAY_ASSIGN_HPP
-#define LTL_ARRAY_ASSIGN_HPP
+/*
+ SPDX-FileCopyrightText: 2023 The Lemuriad <opensource@lemurianlabs.com>
+ SPDX-License-Identifier: BSL-1.0
+ Repo: https://github.com/Lemuriad/c_array_support
+*/
+#ifndef LML_ARRAY_ASSIGN_HPP
+#define LML_ARRAY_ASSIGN_HPP
 /*
   array_assign.hpp
   ================
@@ -325,4 +323,4 @@ constexpr auto& assign_elements(L&& t, T&&...v)
 
 #include "namespace.hpp"
 
-#endif // LTL_ARRAY_ASSIGN_HPP
+#endif // LML_ARRAY_ASSIGN_HPP

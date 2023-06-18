@@ -29,7 +29,7 @@ import('pkgconfig').generate(
   subdirs: 'c_array_support',
   filebase: 'c_array_support',
   description: 'C++20 Concepts, traits and tools for handing C arrays.',
-  url: 'https://github.com/willwray/c_array_support',
+  url: 'https://github.com/Lemuriad/c_array_support',
 )
 
 if get_option('tests').disable_auto_if(meson.is_subproject()).allowed()

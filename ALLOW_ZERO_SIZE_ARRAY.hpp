@@ -1,3 +1,8 @@
+/*
+ SPDX-FileCopyrightText: 2023 The Lemuriad <opensource@lemurianlabs.com>
+ SPDX-License-Identifier: BSL-1.0
+ Repo: https://github.com/Lemuriad/c_array_support
+*/
 /* ALLOW_ZERO_SIZE_ARRAY.hpp
 
    Silence warnings on use of zero-size array type T[0]
